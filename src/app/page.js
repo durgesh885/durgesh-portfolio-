@@ -268,7 +268,7 @@ export default function Home() {
     return () => reveals.forEach((el) => observer.unobserve(el));
   }, [mounted, loaderHidden]);
 
-  // Three.js Interactive Neural Cloud Constellation simulation
+  // Three.js Abstract 3D Cyber-Grid and Orb Constellation
   useEffect(() => {
     if (!mounted || !canvasContainerRef.current) return;
 
@@ -281,192 +281,110 @@ export default function Home() {
     canvasContainerRef.current.appendChild(renderer.domElement);
 
     // Lights
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
     scene.add(ambientLight);
 
-    const directionalLight = new THREE.DirectionalLight(0x00f0ff, 1.5);
-    directionalLight.position.set(5, 10, 7);
-    scene.add(directionalLight);
+    const directionalLight1 = new THREE.DirectionalLight(0x00f0ff, 1.5);
+    directionalLight1.position.set(5, 10, 7);
+    scene.add(directionalLight1);
 
-    // Main background network group
-    const networkGroup = new THREE.Group();
-    scene.add(networkGroup);
+    const pointLight = new THREE.PointLight(0xa855f7, 2.5, 50);
+    pointLight.position.set(-4, 2, 2);
+    scene.add(pointLight);
 
-    const geometriesToDispose = [];
-    const materialsToDispose = [];
+    // Group for Cyber Core
+    const coreGroup = new THREE.Group();
+    scene.add(coreGroup);
 
-    // Create 80 floating network nodes (Neural net)
-    const nodeCount = 80;
-    const nodePositions = [];
-    const nodeVelocities = [];
-
-    for (let i = 0; i < nodeCount; i++) {
-      const pos = new THREE.Vector3(
-        (Math.random() - 0.5) * 12,
-        (Math.random() - 0.5) * 8,
-        (Math.random() - 0.5) * 8 - 2
-      );
-      nodePositions.push(pos);
-
-      const vel = new THREE.Vector3(
-        (Math.random() - 0.5) * 0.006,
-        (Math.random() - 0.5) * 0.006,
-        (Math.random() - 0.5) * 0.006
-      );
-      nodeVelocities.push(vel);
-    }
-
-    // Standard floating nodes geometries
-    const nodeSphereGeom = new THREE.SphereGeometry(0.045, 6, 6);
-    geometriesToDispose.push(nodeSphereGeom);
-
-    const nodeMat = new THREE.MeshBasicMaterial({
+    // 1. Outer Icosahedron (Faceted Wireframe Reactor)
+    const outerGeometry = new THREE.IcosahedronGeometry(1.3, 1);
+    const outerMaterial = new THREE.MeshPhongMaterial({
       color: 0x00f0ff,
+      wireframe: true,
       transparent: true,
-      opacity: 0.5
+      opacity: 0.25,
+      shininess: 100
     });
-    materialsToDispose.push(nodeMat);
+    const outerCore = new THREE.Mesh(outerGeometry, outerMaterial);
+    coreGroup.add(outerCore);
 
-    const nodeMeshes = [];
-    nodePositions.forEach((pos) => {
-      const mesh = new THREE.Mesh(nodeSphereGeom, nodeMat);
-      mesh.position.copy(pos);
-      networkGroup.add(mesh);
-      nodeMeshes.push(mesh);
-    });
-
-    // Special Service Hubs representing cloud systems
-    const serviceNodes = [
-      { id: "Route53", name: "DNS Gateway", type: "dns", pos: new THREE.Vector3(-2.8, 1.4, -2.5), color: 0x3b82f6 },
-      { id: "EC2", name: "Compute Node", type: "ec2", pos: new THREE.Vector3(2.6, 1.0, -2.0), color: 0x00f0ff },
-      { id: "RDS", name: "DB Node", type: "rds", pos: new THREE.Vector3(1.2, -1.2, -2.0), color: 0xec4899 },
-      { id: "S3", name: "Storage Bucket", type: "s3", pos: new THREE.Vector3(-1.8, -1.0, -2.5), color: 0xa855f7 }
-    ];
-
-    const serviceMeshes = [];
-    serviceNodes.forEach((s) => {
-      const sGroup = new THREE.Group();
-      sGroup.position.copy(s.pos);
-      networkGroup.add(sGroup);
-
-      let coreGeom, coreMat;
-      coreMat = new THREE.MeshPhongMaterial({
-        color: s.color,
-        emissive: s.color,
-        emissiveIntensity: 0.5,
-        transparent: true,
-        opacity: 0.85
-      });
-      materialsToDispose.push(coreMat);
-
-      if (s.type === "dns") {
-        coreGeom = new THREE.IcosahedronGeometry(0.24, 0);
-      } else if (s.type === "ec2") {
-        coreGeom = new THREE.BoxGeometry(0.3, 0.3, 0.3);
-      } else {
-        coreGeom = new THREE.CylinderGeometry(0.18, 0.18, 0.36, 10);
-      }
-      geometriesToDispose.push(coreGeom);
-
-      const coreMesh = new THREE.Mesh(coreGeom, coreMat);
-      sGroup.add(coreMesh);
-
-      // Add a rotating wireframe ring around special hubs
-      const ringGeom = new THREE.TorusGeometry(0.38, 0.012, 6, 24);
-      const ringMat = new THREE.MeshBasicMaterial({
-        color: s.color,
-        transparent: true,
-        opacity: 0.45
-      });
-      geometriesToDispose.push(ringGeom);
-      materialsToDispose.push(ringMat);
-
-      const ringMesh = new THREE.Mesh(ringGeom, ringMat);
-      ringMesh.rotation.x = Math.PI / 2;
-      sGroup.add(ringMesh);
-
-      serviceMeshes.push({
-        group: sGroup,
-        ring: ringMesh,
-        core: coreMesh,
-        config: s
-      });
-    });
-
-    // Dynamic Line Segments connecting close nodes
-    const lineMat = new THREE.LineBasicMaterial({
-      color: 0x00f0ff,
-      transparent: true,
-      opacity: 0.16,
-      blending: THREE.AdditiveBlending
-    });
-    materialsToDispose.push(lineMat);
-
-    const lineGeometry = new THREE.BufferGeometry();
-    geometriesToDispose.push(lineGeometry);
-
-    const lineMesh = new THREE.LineSegments(lineGeometry, lineMat);
-    networkGroup.add(lineMesh);
-
-    // Traveling packets representing active data flows
-    const packetGeom = new THREE.SphereGeometry(0.035, 6, 6);
-    geometriesToDispose.push(packetGeom);
-
-    const packets = [];
-    for (let i = 0; i < 8; i++) {
-      const pMat = new THREE.MeshBasicMaterial({
-        color: i % 2 === 0 ? 0x00f0ff : 0xa855f7,
-        transparent: true,
-        opacity: 0.8
-      });
-      materialsToDispose.push(pMat);
-
-      const pMesh = new THREE.Mesh(packetGeom, pMat);
-      networkGroup.add(pMesh);
-
-      // Start/End selection
-      const fromNodeIdx = Math.floor(Math.random() * nodeCount);
-      let toNodeIdx = Math.floor(Math.random() * nodeCount);
-      while (toNodeIdx === fromNodeIdx) {
-        toNodeIdx = Math.floor(Math.random() * nodeCount);
-      }
-
-      packets.push({
-        mesh: pMesh,
-        fromIdx: fromNodeIdx,
-        toIdx: toNodeIdx,
-        progress: Math.random(),
-        speed: 0.003 + Math.random() * 0.004
-      });
-    }
-
-    // Space nebula star field background
-    const starsGeometry = new THREE.BufferGeometry();
-    const starsCount = 200;
-    const starPos = new Float32Array(starsCount * 3);
-
-    for (let i = 0; i < starsCount * 3; i++) {
-      starPos[i] = (Math.random() - 0.5) * 25;
-    }
-
-    starsGeometry.setAttribute("position", new THREE.BufferAttribute(starPos, 3));
-    geometriesToDispose.push(starsGeometry);
-
-    const starsMaterial = new THREE.PointsMaterial({
-      size: 0.035,
+    // 2. Inner Faceted Crystalline Core
+    const innerGeometry = new THREE.IcosahedronGeometry(0.65, 0); // flat facets
+    const innerMaterial = new THREE.MeshPhongMaterial({
       color: 0xa855f7,
       transparent: true,
-      opacity: 0.35,
+      opacity: 0.38,
+      shininess: 150,
+      emissive: 0x3b0764,
+      flatShading: true
+    });
+    const innerCore = new THREE.Mesh(innerGeometry, innerMaterial);
+    coreGroup.add(innerCore);
+
+    // 3. Floating Saturn Cyber Rings
+    const ringGeometry1 = new THREE.TorusGeometry(1.8, 0.02, 8, 64);
+    const ringMaterial1 = new THREE.MeshBasicMaterial({
+      color: 0x00f0ff,
+      transparent: true,
+      opacity: 0.25,
       blending: THREE.AdditiveBlending
     });
-    materialsToDispose.push(starsMaterial);
+    const ring1 = new THREE.Mesh(ringGeometry1, ringMaterial1);
+    ring1.rotation.x = Math.PI / 2;
+    coreGroup.add(ring1);
 
-    const starParticles = new THREE.Points(starsGeometry, starsMaterial);
-    scene.add(starParticles);
+    const ringGeometry2 = new THREE.TorusGeometry(2.1, 0.015, 8, 64);
+    const ringMaterial2 = new THREE.MeshBasicMaterial({
+      color: 0xff007f,
+      transparent: true,
+      opacity: 0.2,
+      blending: THREE.AdditiveBlending
+    });
+    const ring2 = new THREE.Mesh(ringGeometry2, ringMaterial2);
+    ring2.rotation.y = Math.PI / 4;
+    coreGroup.add(ring2);
+
+    // Particle field (Swirling Cyber Dust)
+    const particlesGeometry = new THREE.BufferGeometry();
+    const particlesCount = 280;
+    const posArray = new Float32Array(particlesCount * 3);
+
+    for (let i = 0; i < particlesCount * 3; i++) {
+      posArray[i] = (Math.random() - 0.5) * 20;
+    }
+
+    particlesGeometry.setAttribute("position", new THREE.BufferAttribute(posArray, 3));
+
+    const particlesMaterial = new THREE.PointsMaterial({
+      size: 0.05,
+      color: 0x00f0ff,
+      transparent: true,
+      opacity: 0.5,
+      blending: THREE.AdditiveBlending
+    });
+
+    const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+    scene.add(particlesMesh);
+
+    // Cyber Ground Waving Grid
+    const gridGeometry = new THREE.PlaneGeometry(60, 60, 26, 26);
+    const gridMaterial = new THREE.MeshBasicMaterial({
+      color: 0x00f0ff,
+      wireframe: true,
+      transparent: true,
+      opacity: 0.06,
+      blending: THREE.AdditiveBlending
+    });
+    const gridMesh = new THREE.Mesh(gridGeometry, gridMaterial);
+    gridMesh.rotation.x = -Math.PI / 2; // lay flat
+    gridMesh.position.y = -3.5;
+    gridMesh.position.z = -2;
+    scene.add(gridMesh);
 
     camera.position.z = 7;
+    camera.position.y = 0.5;
 
-    // Mouse movement variables
+    // Mouse movement interaction variables
     let mouseX = 0;
     let mouseY = 0;
     let targetX = 0;
@@ -476,25 +394,29 @@ export default function Home() {
     const windowHalfY = window.innerHeight / 2;
 
     const handleMouseMove = (event) => {
-      mouseX = (event.clientX - windowHalfX) / 220;
-      mouseY = (event.clientY - windowHalfY) / 220;
+      mouseX = (event.clientX - windowHalfX) / 150;
+      mouseY = (event.clientY - windowHalfY) / 150;
     };
 
     document.addEventListener("mousemove", handleMouseMove);
 
-    // Responsive setup
+    // Target position for the Core in 3D Space
+    const targetGroupPos = new THREE.Vector3();
+
+    // Handle responsiveness on sizing
     const checkModelVisibility = () => {
       if (window.innerWidth < 968) {
-        networkGroup.position.set(0, 0, 0);
-        networkGroup.scale.set(0.75, 0.75, 0.75);
+        targetGroupPos.set(0, 1.4, -1.5); // centered on mobile
+        coreGroup.scale.set(0.85, 0.85, 0.85);
       } else {
-        // Positioned in background to have balance
-        networkGroup.position.set(0, 0, 0);
-        networkGroup.scale.set(1.0, 1.0, 1.0);
+        targetGroupPos.set(2.4, 0.6, -2.0); // aligned on desktop right
+        coreGroup.scale.set(1.1, 1.1, 1.1);
       }
+      coreGroup.position.copy(targetGroupPos);
     };
     checkModelVisibility();
 
+    // Resize camera configuration
     const handleResize = () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
@@ -509,106 +431,117 @@ export default function Home() {
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);
 
-      // Smooth camera interpolation
-      targetX = mouseX * 0.35;
-      targetY = mouseY * 0.35;
+      targetX = mouseX * 0.3;
+      targetY = mouseY * 0.3;
 
-      camera.position.x += (targetX - camera.position.x) * 0.04;
-      camera.position.y += (-targetY - camera.position.y) * 0.04;
-      camera.lookAt(scene.position);
-
-      // Scroll interpolation
+      // Smooth scroll interpolation (damping)
       const currentScroll = scrollRef.current;
       targetScrollY += (currentScroll - targetScrollY) * 0.05;
+      
+      // Calculate scroll rotation angle for orbital camera sweep
+      const scrollAngle = targetScrollY * 0.0007; 
+      const radius = 6.0;
 
-      const scrollFactor = targetScrollY * 0.0008;
+      // Orbit camera around coreGroup target position as user scrolls
+      camera.position.x = targetGroupPos.x + Math.sin(scrollAngle + targetX) * radius;
+      camera.position.z = targetGroupPos.z + Math.cos(scrollAngle + targetX) * radius;
+      camera.position.y = targetGroupPos.y + 0.4 + (targetScrollY * 0.0002) - targetY;
+      
+      // Keep looking directly at the core reactor to keep it centered on its relative position
+      camera.lookAt(targetGroupPos.x - (window.innerWidth < 968 ? 0 : 1.8), targetGroupPos.y, targetGroupPos.z);
 
-      // Subtly rotate and shift the network based on scroll factor (stays in view always)
-      networkGroup.position.y = (window.innerWidth < 968 ? 0.3 : 0) - (scrollFactor * 0.25);
-      networkGroup.rotation.y = scrollFactor * 0.15 + Date.now() * 0.0001;
+      // Rotate core elements
+      outerCore.rotation.y += 0.003 + (currentScroll * 0.00001); // spins slightly faster on scroll!
+      outerCore.rotation.x += 0.002;
+      
+      innerCore.rotation.y -= 0.005 + (currentScroll * 0.00001);
+      innerCore.rotation.z += 0.003;
 
-      // Update Node positions (Drifting animation)
-      for (let i = 0; i < nodeCount; i++) {
-        const pos = nodePositions[i];
-        const vel = nodeVelocities[i];
+      ring1.rotation.z += 0.008;
+      ring2.rotation.x -= 0.006;
 
-        pos.add(vel);
+      // Float Y offset slightly over time
+      coreGroup.position.y = targetGroupPos.y + Math.sin(Date.now() * 0.001) * 0.12;
 
-        // Boundary checks
-        if (pos.x < -6.5 || pos.x > 6.5) vel.x *= -1;
-        if (pos.y < -4.5 || pos.y > 4.5) vel.y *= -1;
-        if (pos.z < -6.5 || pos.z > 0) vel.z *= -1;
+      // Dynamic color-shifting on the outer and inner core (HSL gradients)
+      const time = Date.now() * 0.0001;
+      const hueOuter = (time * 0.15) % 1;
+      outerMaterial.color.setHSL(hueOuter, 1.0, 0.5); 
+      
+      const hueInner = (time * 0.15 + 0.33) % 1;
+      innerMaterial.color.setHSL(hueInner, 0.85, 0.5); 
+      innerMaterial.emissive.setHSL(hueInner, 0.85, 0.2);
 
-        nodeMeshes[i].position.copy(pos);
+      // Waving Cyber Grid animation
+      const gridPositions = gridGeometry.attributes.position.array;
+      const gridTime = Date.now() * 0.0015;
+      for (let i = 0; i < gridPositions.length; i += 3) {
+        const x = gridPositions[i];
+        const y = gridPositions[i + 1];
+        gridPositions[i + 2] = Math.sin(x * 0.25 + gridTime) * Math.cos(y * 0.25 + gridTime) * 0.45;
       }
+      gridGeometry.attributes.position.needsUpdate = true;
 
-      // Rotate Special Cloud Nodes
-      serviceMeshes.forEach((s) => {
-        s.group.rotation.y += 0.008;
-        s.ring.rotation.z -= 0.012;
-      });
+      // Swirling galaxy dust particles
+      const positions = particlesGeometry.attributes.position.array;
+      const particleTime = Date.now() * 0.0008;
+      for (let i = 0; i < particlesCount; i++) {
+        const i3 = i * 3;
+        const px = positions[i3];
+        const pz = positions[i3 + 2];
+        const py = positions[i3 + 1];
 
-      // Update Connections (Lines between close nodes)
-      const linePositionsArray = [];
-      for (let i = 0; i < nodeCount; i++) {
-        const posA = nodePositions[i];
-        
-        // Check connections between floating nodes
-        for (let j = i + 1; j < nodeCount; j++) {
-          const posB = nodePositions[j];
-          const dist = posA.distanceTo(posB);
-          if (dist < 2.0) {
-            linePositionsArray.push(posA.x, posA.y, posA.z, posB.x, posB.y, posB.z);
-          }
+        // Orbit rotation around Y-axis
+        const orbitSpeed = 0.0025;
+        const cosA = Math.cos(orbitSpeed);
+        const sinA = Math.sin(orbitSpeed);
+        positions[i3] = px * cosA - pz * sinA;
+        positions[i3 + 2] = px * sinA + pz * cosA;
+
+        // Wave motion on vertical coordinate
+        positions[i3 + 1] = py + Math.sin(particleTime + px * 0.3) * 0.005;
+
+        // Reset if drifted too far
+        if (Math.abs(positions[i3 + 1]) > 10) {
+          positions[i3 + 1] = (Math.random() - 0.5) * 16;
         }
-
-        // Check connections from floating nodes to special hubs
-        serviceNodes.forEach((s) => {
-          const dist = posA.distanceTo(s.pos);
-          if (dist < 2.2) {
-            linePositionsArray.push(posA.x, posA.y, posA.z, s.pos.x, s.pos.y, s.pos.z);
-          }
-        });
       }
+      particlesGeometry.attributes.position.needsUpdate = true;
 
-      lineGeometry.setAttribute("position", new THREE.Float32BufferAttribute(linePositionsArray, 3));
-      lineGeometry.attributes.position.needsUpdate = true;
-
-      // Update data packets along lines
-      packets.forEach((p) => {
-        p.progress += p.speed;
-        if (p.progress >= 1.0) {
-          p.progress = 0;
-          p.fromIdx = Math.floor(Math.random() * nodeCount);
-          p.toIdx = Math.floor(Math.random() * nodeCount);
-          while (p.toIdx === p.fromIdx) {
-            p.toIdx = Math.floor(Math.random() * nodeCount);
-          }
-        }
-        
-        const posA = nodePositions[p.fromIdx];
-        const posB = nodePositions[p.toIdx];
-        p.mesh.position.lerpVectors(posA, posB, p.progress);
-      });
-
-      // Slowly rotate background stars
-      starParticles.rotation.y += 0.0003;
+      // Rotate particles mesh slightly
+      particlesMesh.rotation.y += 0.0004;
 
       renderer.render(scene, camera);
     };
 
     animate();
 
+    // Clean up WebGL resources
     return () => {
       cancelAnimationFrame(animationFrameId);
       document.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("resize", handleResize);
 
-      geometriesToDispose.forEach((g) => g.dispose());
-      materialsToDispose.forEach((m) => m.dispose());
+      // Dispose Geometries
+      outerGeometry.dispose();
+      innerGeometry.dispose();
+      ringGeometry1.dispose();
+      ringGeometry2.dispose();
+      particlesGeometry.dispose();
+      gridGeometry.dispose();
 
-      scene.remove(starParticles);
-      scene.remove(networkGroup);
+      // Dispose Materials
+      outerMaterial.dispose();
+      innerMaterial.dispose();
+      ringMaterial1.dispose();
+      ringMaterial2.dispose();
+      particlesMaterial.dispose();
+      gridMaterial.dispose();
+
+      // Dispose Meshes from Scene
+      scene.remove(particlesMesh);
+      scene.remove(coreGroup);
+      scene.remove(gridMesh);
 
       if (canvasContainerRef.current && renderer.domElement) {
         canvasContainerRef.current.removeChild(renderer.domElement);
@@ -667,46 +600,7 @@ export default function Home() {
       {/* Three.js Canvas Container */}
       <div id="canvas-container" ref={canvasContainerRef}></div>
 
-      {/* DevOps HUD Console (Desktop Only overlays) */}
-      <div className="devops-hud left-hud">
-        <div className="hud-header mono">SYS STATUS</div>
-        <div className="hud-body mono">
-          <div className="hud-metric">
-            <span>REGION:</span>
-            <span className="text-glow">us-east-1</span>
-          </div>
-          <div className="hud-metric">
-            <span>EC2 CLUSTER:</span>
-            <span className="text-glow green-text">ACTIVE (3)</span>
-          </div>
-          <div className="hud-metric">
-            <span>S3 BACKUP:</span>
-            <span className="text-glow">SYNCED</span>
-          </div>
-          <div className="hud-metric">
-            <span>PIPELINE:</span>
-            <span className="text-glow anim-pulse">READY</span>
-          </div>
-          <div className="hud-cpu-load">
-            <div className="hud-cpu-label">CPU LOAD: 24.5%</div>
-            <div className="hud-progress-bar">
-              <div className="hud-progress-fill" style={{ width: "24.5%" }}></div>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      <div className="devops-hud right-hud">
-        <div className="hud-header mono">CLOUDWATCH LOGS</div>
-        <div className="hud-body mono console-logs">
-          {logs.map((log, index) => (
-            <div key={index} className="hud-log-line">
-              {log}
-            </div>
-          ))}
-          <div className="hud-log-line flashing-caret">&gt; _</div>
-        </div>
-      </div>
 
       {/* Navigation */}
       <nav id="navbar" className={navbarScrolled ? "scrolled" : ""}>
