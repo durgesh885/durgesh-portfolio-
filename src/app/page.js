@@ -70,6 +70,14 @@ const LinkedinIcon = () => (
   </svg>
 );
 
+const ExternalLinkIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+    <polyline points="15 3 21 3 21 9"></polyline>
+    <line x1="10" y1="14" x2="21" y2="3"></line>
+  </svg>
+);
+
 export default function Home() {
   // SSR Safety
   const [mounted, setMounted] = useState(false);
@@ -90,55 +98,14 @@ export default function Home() {
   // Dynamic Loader Progress State
   const [progress, setProgress] = useState(0);
 
-  // DevOps live CloudWatch logs simulation state
-  const [logs, setLogs] = useState([
-    "[SYS] Route53 routing request to active server group.",
-    "[SYS] VPC flow logs verified. Security check passed.",
-    "[CICD] Build success for durgesh-portfolio:latest.",
-    "[SYS] AWS CloudWatch agent status: RUNNING."
-  ]);
-
-  // Loader log sequence targets
-  const loaderLogs = [
-    { pct: 0, text: "[SYSTEM] Booting Durgesh Cloud Engine v3.0..." },
-    { pct: 15, text: "[NETWORK] Handshaking with AWS Route53 DNS gateway..." },
-    { pct: 35, text: "[COMPUTE] Allocating EC2-t3.medium cluster nodes..." },
-    { pct: 55, text: "[STORAGE] Mounting secure S3 asset buckets (SSL Enabled)..." },
-    { pct: 75, text: "[DATABASE] Synchronizing MongoDB and relational databases..." },
-    { pct: 90, text: "[PIPELINE] Deploying CI/CD container flow targets..." },
-    { pct: 100, text: "[SUCCESS] All cloud subsystems operational. Launching portfolio..." }
-  ];
+  // Contact Form States
+  const [formData, setFormData] = useState({ name: "", email: "", message: "" });
+  const [formStatus, setFormStatus] = useState("idle"); // idle | sending | success
 
   // Set mount safety
   useEffect(() => {
     setMounted(true);
   }, []);
-
-  // DevOps Logs simulation interval
-  useEffect(() => {
-    if (!mounted) return;
-    const devopsLogsList = [
-      "[SYS] Route53 routing request to active server group.",
-      "[SYS] VPC flow logs verified. Security check passed.",
-      "[CICD] Build success for durgesh-portfolio:latest.",
-      "[SYS] AWS CloudWatch agent status: RUNNING.",
-      "[SYS] EC2 CPU utilization stable at 24.5%.",
-      "[SYS] S3 bucket sync: Backup completed successfully.",
-      "[SYS] DB connection pool optimized (12 active).",
-      "[SYS] CloudFront edge caches invalidated.",
-      "[CICD] Deploying container v2.0.4 to cluster...",
-      "[SYS] Health check status 200 OK for target-group."
-    ];
-
-    const interval = setInterval(() => {
-      setLogs((prev) => {
-        const nextLog = devopsLogsList[Math.floor(Math.random() * devopsLogsList.length)];
-        return [...prev.slice(1), nextLog];
-      });
-    }, 4000);
-
-    return () => clearInterval(interval);
-  }, [mounted]);
 
   // Dynamic Loader Progress Loop
   useEffect(() => {
@@ -268,7 +235,7 @@ export default function Home() {
     return () => reveals.forEach((el) => observer.unobserve(el));
   }, [mounted, loaderHidden]);
 
-  // Three.js Abstract 3D Cyber-Grid and Orb Constellation
+  // Three.js 3D Holographic Torus Knot (Dancing Spiral/Design Sphere) simulation
   useEffect(() => {
     if (!mounted || !canvasContainerRef.current) return;
 
@@ -281,110 +248,115 @@ export default function Home() {
     canvasContainerRef.current.appendChild(renderer.domElement);
 
     // Lights
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.95);
     scene.add(ambientLight);
 
-    const directionalLight1 = new THREE.DirectionalLight(0x00f0ff, 1.5);
+    const directionalLight1 = new THREE.DirectionalLight(0x00f0ff, 2.0);
     directionalLight1.position.set(5, 10, 7);
     scene.add(directionalLight1);
 
-    const pointLight = new THREE.PointLight(0x0066ff, 2.5, 50);
+    const pointLight = new THREE.PointLight(0x0055ff, 3.5, 50); // Neon Blue
     pointLight.position.set(-4, 2, 2);
     scene.add(pointLight);
 
-    // Group for Cyber Core
-    const coreGroup = new THREE.Group();
-    scene.add(coreGroup);
+    const pointLight2 = new THREE.PointLight(0x00f0ff, 2.5, 30); // Neon Cyan
+    pointLight2.position.set(4, -2, 2);
+    scene.add(pointLight2);
 
-    // 1. Outer Icosahedron (Faceted Wireframe Reactor)
-    const outerGeometry = new THREE.IcosahedronGeometry(1.3, 1);
-    const outerMaterial = new THREE.MeshPhongMaterial({
+    // Main Torus Group
+    const torusGroup = new THREE.Group();
+    scene.add(torusGroup);
+
+    const geometriesToDispose = [];
+    const materialsToDispose = [];
+
+    // 1. Dual-Layer Torus Knot Core
+    // Layer A: Outer Neon Cyan Wireframe
+    const torusGeometry = new THREE.TorusKnotGeometry(1.2, 0.32, 150, 16);
+    geometriesToDispose.push(torusGeometry);
+
+    const torusMaterial = new THREE.MeshPhongMaterial({
       color: 0x00f0ff,
       wireframe: true,
       transparent: true,
-      opacity: 0.25,
-      shininess: 100
+      opacity: 0.35, // Slightly more visible
+      shininess: 120,
+      specular: 0x00f0ff
     });
-    const outerCore = new THREE.Mesh(outerGeometry, outerMaterial);
-    coreGroup.add(outerCore);
+    materialsToDispose.push(torusMaterial);
 
-    // 2. Inner Faceted Crystalline Core
-    const innerGeometry = new THREE.IcosahedronGeometry(0.65, 0); // flat facets
-    const innerMaterial = new THREE.MeshPhongMaterial({
-      color: 0x0066ff,
+    const torusKnotMesh = new THREE.Mesh(torusGeometry, torusMaterial);
+    torusGroup.add(torusKnotMesh);
+
+    // Layer B: Inner Solid Low-Poly Glow-Blue Core
+    const torusInnerGeometry = new THREE.TorusKnotGeometry(1.14, 0.26, 80, 10);
+    geometriesToDispose.push(torusInnerGeometry);
+
+    const torusInnerMaterial = new THREE.MeshPhongMaterial({
+      color: 0x0066ff, // Pure Blue
       transparent: true,
-      opacity: 0.38,
-      shininess: 150,
-      emissive: 0x002288,
+      opacity: 0.22, // Slightly more solid glow
+      shininess: 100,
+      specular: 0x00f0ff,
       flatShading: true
     });
-    const innerCore = new THREE.Mesh(innerGeometry, innerMaterial);
-    coreGroup.add(innerCore);
+    materialsToDispose.push(torusInnerMaterial);
 
-    // 3. Floating Saturn Cyber Rings
-    const ringGeometry1 = new THREE.TorusGeometry(1.8, 0.02, 8, 64);
-    const ringMaterial1 = new THREE.MeshBasicMaterial({
-      color: 0x00f0ff,
-      transparent: true,
-      opacity: 0.25,
-      blending: THREE.AdditiveBlending
-    });
-    const ring1 = new THREE.Mesh(ringGeometry1, ringMaterial1);
-    ring1.rotation.x = Math.PI / 2;
-    coreGroup.add(ring1);
+    const torusInnerMesh = new THREE.Mesh(torusInnerGeometry, torusInnerMaterial);
+    torusGroup.add(torusInnerMesh);
 
-    const ringGeometry2 = new THREE.TorusGeometry(2.1, 0.015, 8, 64);
-    const ringMaterial2 = new THREE.MeshBasicMaterial({
-      color: 0x00ffd2,
-      transparent: true,
-      opacity: 0.2,
-      blending: THREE.AdditiveBlending
-    });
-    const ring2 = new THREE.Mesh(ringGeometry2, ringMaterial2);
-    ring2.rotation.y = Math.PI / 4;
-    coreGroup.add(ring2);
+    // 3. Cyber Ground Perspective Grid (Scrolling Server Floor)
+    const gridHelper = new THREE.GridHelper(60, 48, 0x00f0ff, 0x090d16);
+    gridHelper.position.y = -3.8;
+    gridHelper.position.z = -2;
+    gridHelper.material.opacity = 0.07;
+    gridHelper.material.transparent = true;
+    scene.add(gridHelper);
 
-    // Particle field (Swirling Cyber Dust)
+    // 4. Orbiting Data Packet Particle Vortex
     const particlesGeometry = new THREE.BufferGeometry();
-    const particlesCount = 280;
-    const posArray = new Float32Array(particlesCount * 3);
+    const particlesCount = 240;
+    const positions = new Float32Array(particlesCount * 3);
+    const particleSpeeds = [];
+    const particleAngles = [];
+    const particleRadii = [];
+    const particleOscillations = [];
 
-    for (let i = 0; i < particlesCount * 3; i++) {
-      posArray[i] = (Math.random() - 0.5) * 20;
+    for (let i = 0; i < particlesCount; i++) {
+      const radius = 1.8 + Math.random() * 6.5;
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 0.002 + Math.random() * 0.005;
+      const height = (Math.random() - 0.5) * 3.5;
+      const oscSpeed = 0.001 + Math.random() * 0.003;
+
+      particleRadii.push(radius);
+      particleAngles.push(angle);
+      particleSpeeds.push(speed);
+      particleOscillations.push({ speed: oscSpeed, current: Math.random() * 100, amp: 0.1 + Math.random() * 0.2 });
+
+      positions[i * 3] = Math.cos(angle) * radius;
+      positions[i * 3 + 1] = height;
+      positions[i * 3 + 2] = Math.sin(angle) * radius;
     }
 
-    particlesGeometry.setAttribute("position", new THREE.BufferAttribute(posArray, 3));
+    particlesGeometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    geometriesToDispose.push(particlesGeometry);
 
     const particlesMaterial = new THREE.PointsMaterial({
-      size: 0.05,
-      color: 0x00f0ff,
+      size: 0.045,
+      color: 0x00f0ff, // Cyan-blue particles
       transparent: true,
-      opacity: 0.5,
+      opacity: 0.55,
       blending: THREE.AdditiveBlending
     });
+    materialsToDispose.push(particlesMaterial);
 
-    const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
-    scene.add(particlesMesh);
-
-    // Cyber Ground Waving Grid
-    const gridGeometry = new THREE.PlaneGeometry(60, 60, 26, 26);
-    const gridMaterial = new THREE.MeshBasicMaterial({
-      color: 0x00f0ff,
-      wireframe: true,
-      transparent: true,
-      opacity: 0.06,
-      blending: THREE.AdditiveBlending
-    });
-    const gridMesh = new THREE.Mesh(gridGeometry, gridMaterial);
-    gridMesh.rotation.x = -Math.PI / 2; // lay flat
-    gridMesh.position.y = -3.5;
-    gridMesh.position.z = -2;
-    scene.add(gridMesh);
+    const dataParticles = new THREE.Points(particlesGeometry, particlesMaterial);
+    scene.add(dataParticles);
 
     camera.position.z = 7;
-    camera.position.y = 0.5;
 
-    // Mouse movement interaction variables
+    // Mouse movement variables
     let mouseX = 0;
     let mouseY = 0;
     let targetX = 0;
@@ -394,29 +366,27 @@ export default function Home() {
     const windowHalfY = window.innerHeight / 2;
 
     const handleMouseMove = (event) => {
-      mouseX = (event.clientX - windowHalfX) / 150;
-      mouseY = (event.clientY - windowHalfY) / 150;
+      mouseX = (event.clientX - windowHalfX) / 250;
+      mouseY = (event.clientY - windowHalfY) / 250;
     };
 
     document.addEventListener("mousemove", handleMouseMove);
 
-    // Target position for the Core in 3D Space
+    // Target positions in 3D space (Desktop vs Mobile)
     const targetGroupPos = new THREE.Vector3();
 
-    // Handle responsiveness on sizing
     const checkModelVisibility = () => {
       if (window.innerWidth < 968) {
-        targetGroupPos.set(0, 1.4, -1.5); // centered on mobile
-        coreGroup.scale.set(0.85, 0.85, 0.85);
+        targetGroupPos.set(0, 1.2, -3.0);
+        torusGroup.scale.set(0.75, 0.75, 0.75);
       } else {
-        targetGroupPos.set(2.4, 0.6, -2.0); // aligned on desktop right
-        coreGroup.scale.set(1.1, 1.1, 1.1);
+        targetGroupPos.set(4.4, 0.3, -1.5); // Move further right on desktop
+        torusGroup.scale.set(1.1, 1.1, 1.1);
       }
-      coreGroup.position.copy(targetGroupPos);
+      torusGroup.position.copy(targetGroupPos);
     };
     checkModelVisibility();
 
-    // Resize camera configuration
     const handleResize = () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
@@ -431,85 +401,58 @@ export default function Home() {
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);
 
-      targetX = mouseX * 0.3;
-      targetY = mouseY * 0.3;
+      // Smooth camera interpolation based on mouse (parallax)
+      targetX = mouseX * 0.35;
+      targetY = mouseY * 0.35;
 
-      // Smooth scroll interpolation (damping)
+      camera.position.x += (targetX - camera.position.x) * 0.04;
+      camera.position.y += (-targetY - camera.position.y) * 0.04;
+      
+      camera.lookAt(targetGroupPos.x - (window.innerWidth < 968 ? 0 : 2.5), targetGroupPos.y, targetGroupPos.z);
+
+      // Scroll interpolation
       const currentScroll = scrollRef.current;
       targetScrollY += (currentScroll - targetScrollY) * 0.05;
-      
-      // Calculate scroll rotation angle for orbital camera sweep
-      const scrollAngle = targetScrollY * 0.0007; 
-      const radius = 6.0;
+      const scrollFactor = targetScrollY * 0.0006;
 
-      // Orbit camera around coreGroup target position as user scrolls
-      camera.position.x = targetGroupPos.x + Math.sin(scrollAngle + targetX) * radius;
-      camera.position.z = targetGroupPos.z + Math.cos(scrollAngle + targetX) * radius;
-      camera.position.y = targetGroupPos.y + 0.4 + (targetScrollY * 0.0002) - targetY;
-      
-      // Keep looking directly at the core reactor to keep it centered on its relative position
-      camera.lookAt(targetGroupPos.x - (window.innerWidth < 968 ? 0 : 1.8), targetGroupPos.y, targetGroupPos.z);
+      // Rotate and float the Torus group based on scroll factor and time
+      torusGroup.position.y = targetGroupPos.y + Math.sin(Date.now() * 0.001) * 0.15 - (scrollFactor * 0.2);
+      torusGroup.rotation.y = scrollFactor * 0.15 + Date.now() * 0.0002;
+      torusGroup.rotation.x = Math.sin(Date.now() * 0.0005) * 0.1;
 
-      // Rotate core elements
-      outerCore.rotation.y += 0.003 + (currentScroll * 0.00001); // spins slightly faster on scroll!
-      outerCore.rotation.x += 0.002;
-      
-      innerCore.rotation.y -= 0.005 + (currentScroll * 0.00001);
-      innerCore.rotation.z += 0.003;
+      // Spin internal mesh elements and orbital rings
+      torusKnotMesh.rotation.y += 0.003;
+      torusKnotMesh.rotation.x += 0.001;
+      torusInnerMesh.rotation.y -= 0.002;
+      torusInnerMesh.rotation.z += 0.001;
 
-      ring1.rotation.z += 0.008;
-      ring2.rotation.x -= 0.006;
+      // Surrounding rings removed
 
-      // Float Y offset slightly over time
-      coreGroup.position.y = targetGroupPos.y + Math.sin(Date.now() * 0.001) * 0.12;
-
-      // Dynamic color-shifting restricted to cyan-blue spectrum (no red/purple)
-      const time = Date.now() * 0.0001;
-      const hueOuter = 0.5 + Math.sin(time * 0.5) * 0.08; 
-      outerMaterial.color.setHSL(hueOuter, 1.0, 0.5); 
-      
-      const hueInner = 0.58 + Math.cos(time * 0.5) * 0.08; 
-      innerMaterial.color.setHSL(hueInner, 0.85, 0.5); 
-      innerMaterial.emissive.setHSL(hueInner, 0.85, 0.2);
-
-      // Waving Cyber Grid animation
-      const gridPositions = gridGeometry.attributes.position.array;
-      const gridTime = Date.now() * 0.0015;
-      for (let i = 0; i < gridPositions.length; i += 3) {
-        const x = gridPositions[i];
-        const y = gridPositions[i + 1];
-        gridPositions[i + 2] = Math.sin(x * 0.25 + gridTime) * Math.cos(y * 0.25 + gridTime) * 0.45;
+      // Infinite scrolling grid (illusion of movement)
+      gridHelper.position.z += 0.015;
+      // Grid cells repeat every 60 / 48 = 1.25 units
+      if (gridHelper.position.z >= 1.25) {
+        gridHelper.position.z = 0;
       }
-      gridGeometry.attributes.position.needsUpdate = true;
+      gridHelper.rotation.y = mouseX * 0.05;
 
-      // Swirling galaxy dust particles
-      const positions = particlesGeometry.attributes.position.array;
-      const particleTime = Date.now() * 0.0008;
+      // Update Orbiting Data Particles positions
+      const positionsArr = particlesGeometry.attributes.position.array;
       for (let i = 0; i < particlesCount; i++) {
-        const i3 = i * 3;
-        const px = positions[i3];
-        const pz = positions[i3 + 2];
-        const py = positions[i3 + 1];
+        particleAngles[i] += particleSpeeds[i];
+        
+        // Add smooth wave oscillation to make it look organic
+        particleOscillations[i].current += particleOscillations[i].speed;
+        const wave = Math.sin(particleOscillations[i].current) * particleOscillations[i].amp;
 
-        // Orbit rotation around Y-axis
-        const orbitSpeed = 0.0025;
-        const cosA = Math.cos(orbitSpeed);
-        const sinA = Math.sin(orbitSpeed);
-        positions[i3] = px * cosA - pz * sinA;
-        positions[i3 + 2] = px * sinA + pz * cosA;
-
-        // Wave motion on vertical coordinate
-        positions[i3 + 1] = py + Math.sin(particleTime + px * 0.3) * 0.005;
-
-        // Reset if drifted too far
-        if (Math.abs(positions[i3 + 1]) > 10) {
-          positions[i3 + 1] = (Math.random() - 0.5) * 16;
-        }
+        positionsArr[i * 3] = Math.cos(particleAngles[i]) * particleRadii[i];
+        positionsArr[i * 3 + 1] += wave * 0.02; // slight hover movement
+        positionsArr[i * 3 + 2] = Math.sin(particleAngles[i]) * particleRadii[i];
       }
       particlesGeometry.attributes.position.needsUpdate = true;
 
-      // Rotate particles mesh slightly
-      particlesMesh.rotation.y += 0.0004;
+      // Slowly rotate the particle system system-wide
+      dataParticles.rotation.y += 0.0001;
 
       renderer.render(scene, camera);
     };
@@ -522,26 +465,13 @@ export default function Home() {
       document.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("resize", handleResize);
 
-      // Dispose Geometries
-      outerGeometry.dispose();
-      innerGeometry.dispose();
-      ringGeometry1.dispose();
-      ringGeometry2.dispose();
-      particlesGeometry.dispose();
-      gridGeometry.dispose();
+      geometriesToDispose.forEach((g) => g.dispose());
+      materialsToDispose.forEach((m) => m.dispose());
 
-      // Dispose Materials
-      outerMaterial.dispose();
-      innerMaterial.dispose();
-      ringMaterial1.dispose();
-      ringMaterial2.dispose();
-      particlesMaterial.dispose();
-      gridMaterial.dispose();
-
-      // Dispose Meshes from Scene
-      scene.remove(particlesMesh);
-      scene.remove(coreGroup);
-      scene.remove(gridMesh);
+      gridHelper.dispose();
+      scene.remove(dataParticles);
+      scene.remove(gridHelper);
+      scene.remove(torusGroup);
 
       if (canvasContainerRef.current && renderer.domElement) {
         canvasContainerRef.current.removeChild(renderer.domElement);
@@ -563,6 +493,24 @@ export default function Home() {
     }
   };
 
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
+    if (!formData.name || !formData.email || !formData.message) return;
+    
+    setFormStatus("sending");
+    
+    // Simulate SQS queue / AWS Lambda dispatch
+    setTimeout(() => {
+      setFormStatus("success");
+      setFormData({ name: "", email: "", message: "" });
+      
+      // Reset back to idle after 4 seconds
+      setTimeout(() => {
+        setFormStatus("idle");
+      }, 4000);
+    }, 1800);
+  };
+
   if (!mounted) {
     return null; // Safe guard against SSR flashes
   }
@@ -571,25 +519,8 @@ export default function Home() {
     <>
       {/* Loading Screen */}
       <div className={`loader ${loaderHidden ? "hidden" : ""}`} id="loader">
-        <div className="loader-console">
-          <div className="console-header">
-            <span className="console-title mono">AWS Cloud DevOps Console - Booting...</span>
-          </div>
-          <div className="console-screen mono">
-            {loaderLogs.map((log, index) => {
-              if (progress >= log.pct) {
-                return (
-                  <div key={index} className="console-log-line">
-                    <span className="log-success">[OK]</span> {log.text}
-                  </div>
-                );
-              }
-              return null;
-            })}
-            <div className="console-input-line">
-              <span className="console-prompt">$</span> <span className="blinking-cursor">_</span>
-            </div>
-          </div>
+        <div className="loader-minimal-content">
+          <div className="loader-logo mono">&lt;DURGESH /&gt;</div>
           <div className="loader-line-container">
             <div className="loader-line" style={{ width: `${progress}%` }}></div>
           </div>
@@ -769,15 +700,16 @@ export default function Home() {
                 durgesh@aws-ops: ~/devops-config
               </span>
             </div>
+            
             <div className="code-body">
               <div className="code-row"><span className="line-num">1</span><span className="code-line"><span className="keyword">const</span> <span className="var">engineer</span> = &#123;</span></div>
-              <div className="code-row"><span className="line-num">2</span><span className="code-line">&nbsp;&nbsp;name: <span className="string">'Durgesh Chaudhari'</span>,</span></div>
-              <div className="code-row"><span className="line-num">3</span><span className="code-line">&nbsp;&nbsp;role: <span className="string">'Cloud & DevOps Engineer'</span>,</span></div>
-              <div className="code-row"><span className="line-num">4</span><span className="code-line">&nbsp;&nbsp;stack: [<span className="string">'MongoDB'</span>, <span className="string">'Express'</span>,</span></div>
+              <div className="code-row"><span className="line-num">2</span><span className="code-line">&nbsp;&nbsp;<span className="key">name</span>: <span className="string">'Durgesh Chaudhari'</span>,</span></div>
+              <div className="code-row"><span className="line-num">3</span><span className="code-line">&nbsp;&nbsp;<span className="key">role</span>: <span className="string">'Cloud & DevOps Engineer'</span>,</span></div>
+              <div className="code-row"><span className="line-num">4</span><span className="code-line">&nbsp;&nbsp;<span className="key">stack</span>: [<span className="string">'MongoDB'</span>, <span className="string">'Express'</span>,</span></div>
               <div className="code-row"><span className="line-num">5</span><span className="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="string">'React'</span>, <span style={{ color: "#ff79c6" }}>'Node.js'</span>],</span></div>
-              <div className="code-row"><span className="line-num">6</span><span className="code-line">&nbsp;&nbsp;cloud: [<span className="string">'AWS EC2'</span>, <span className="string">'S3'</span>, <span className="string">'Route53'</span>, <span className="string">'VPC'</span>],</span></div>
-              <div className="code-row"><span className="line-num">7</span><span className="code-line">&nbsp;&nbsp;devops: [<span className="string">'CI/CD'</span>, <span className="string">'Linux Admin'</span>, <span className="string">'Apache'</span>],</span></div>
-              <div className="code-row"><span className="line-num">8</span><span className="code-line">&nbsp;&nbsp;status: <span className="string">'Nominal / Ready to Deploy'</span></span></div>
+              <div className="code-row"><span className="line-num">6</span><span className="code-line">&nbsp;&nbsp;<span className="key">cloud</span>: [<span className="string">'AWS EC2'</span>, <span className="string">'S3'</span>, <span className="string">'Route53'</span>, <span className="string">'VPC'</span>],</span></div>
+              <div className="code-row"><span className="line-num">7</span><span className="code-line">&nbsp;&nbsp;<span className="key">devops</span>: [<span className="string">'CI/CD'</span>, <span className="string">'Linux Admin'</span>, <span className="string">'Apache'</span>],</span></div>
+              <div className="code-row"><span className="line-num">8</span><span className="code-line">&nbsp;&nbsp;<span className="key">status</span>: <span className="string">'Nominal / Ready to Deploy'</span></span></div>
               <div className="code-row"><span className="line-num">9</span><span className="code-line">&#125;;</span></div>
             </div>
           </div>
@@ -802,55 +734,55 @@ export default function Home() {
           </div>
           
           <div className="skills-grid">
-            <div className="skill-card reveal">
+            <div className="skill-card reveal cloud-theme">
               <div className="skill-cat-header">
                 <div className="skill-cat-icon"><CloudIcon /></div>
                 <h3 className="skill-cat-title">Cloud Infrastructure</h3>
               </div>
-              <div className="skill-list">
-                <div className="skill-item"><span className="skill-name">AWS EC2 / S3</span><span className="skill-level">Hands-on</span></div>
-                <div className="skill-item"><span className="skill-name">AWS Route 53 / VPC</span><span className="skill-level">Hands-on</span></div>
-                <div className="skill-item"><span className="skill-name">Security Groups & IAM</span><span className="skill-level">Intermediate</span></div>
-                <div className="skill-item"><span className="skill-name">Linux System Admin</span><span className="skill-level">Intermediate</span></div>
-                <div className="skill-item"><span className="skill-name">Apache Configuration</span><span className="skill-level">Configured</span></div>
+              <div className="skill-badges-container">
+                <span className="skill-badge">AWS EC2 / S3</span>
+                <span className="skill-badge">AWS Route 53 / VPC</span>
+                <span className="skill-badge">Security Groups & IAM</span>
+                <span className="skill-badge">Linux System Admin</span>
+                <span className="skill-badge">Apache Configuration</span>
               </div>
             </div>
             
-            <div className="skill-card reveal">
+            <div className="skill-card reveal devops-theme">
               <div className="skill-cat-header">
                 <div className="skill-cat-icon"><BackendIcon /></div>
                 <h3 className="skill-cat-title">DevOps & Admin</h3>
               </div>
-              <div className="skill-list">
-                <div className="skill-item"><span className="skill-name">Git & GitHub versioning</span><span className="skill-level">Regular</span></div>
-                <div className="skill-item"><span className="skill-name">Bash Shell Scripting</span><span className="skill-level">Exploring</span></div>
-                <div className="skill-item"><span className="skill-name">CI/CD Pipeline Concepts</span><span className="skill-level">Learning</span></div>
-                <div className="skill-item"><span className="skill-name">Docker Containers</span><span className="skill-level">Beginning</span></div>
+              <div className="skill-badges-container">
+                <span className="skill-badge">Git & GitHub</span>
+                <span className="skill-badge">Bash Shell Scripting</span>
+                <span className="skill-badge">CI/CD Pipelines</span>
+                <span className="skill-badge">Docker Containers</span>
               </div>
             </div>
             
-            <div className="skill-card reveal">
+            <div className="skill-card reveal frontend-theme">
               <div className="skill-cat-header">
                 <div className="skill-cat-icon"><CodeIcon /></div>
                 <h3 className="skill-cat-title">Frontend Stack</h3>
               </div>
-              <div className="skill-list">
-                <div className="skill-item"><span className="skill-name">JavaScript (ES6+)</span><span className="skill-level">Intermediate</span></div>
-                <div className="skill-item"><span className="skill-name">HTML5 & CSS3</span><span className="skill-level">Advanced</span></div>
-                <div className="skill-item"><span className="skill-name">React.js Framework</span><span className="skill-level">Learning</span></div>
-                <div className="skill-item"><span className="skill-name">Tailwind CSS</span><span className="skill-level">Learning</span></div>
+              <div className="skill-badges-container">
+                <span className="skill-badge">JavaScript (ES6+)</span>
+                <span className="skill-badge">HTML5 & CSS3</span>
+                <span className="skill-badge">React.js Framework</span>
+                <span className="skill-badge">Tailwind CSS</span>
               </div>
             </div>
             
-            <div className="skill-card reveal">
+            <div className="skill-card reveal learning-theme">
               <div className="skill-cat-header">
                 <div className="skill-cat-icon"><LearningIcon /></div>
                 <h3 className="skill-cat-title">Currently Learning</h3>
               </div>
-              <div className="skill-list">
-                <div className="skill-item"><span className="skill-name">Node.js & Express</span><span className="skill-level">Intermediate</span></div>
-                <div className="skill-item"><span className="skill-name">MongoDB Integration</span><span className="skill-level">Intermediate</span></div>
-                <div className="skill-item"><span className="skill-name">Infrastructure as Code (IaC)</span><span className="skill-level">Exploring</span></div>
+              <div className="skill-badges-container">
+                <span className="skill-badge">Node.js & Express</span>
+                <span className="skill-badge">MongoDB Integration</span>
+                <span className="skill-badge">Infrastructure as Code</span>
               </div>
             </div>
           </div>
@@ -867,93 +799,107 @@ export default function Home() {
           </div>
           
           <div className="projects-grid">
+            
+            {/* Project 1 */}
             <div className="project-card reveal">
-              <div className="project-image">
-                <ProjectCloudIcon />
-                <span className="project-status">Live on AWS</span>
-              </div>
-              <div className="project-content">
-                <div className="project-category">Cloud Deployment</div>
+              <div className="project-card-header">
                 <h3 className="project-title">Automated Web Server Hosting on AWS</h3>
-                <p className="project-desc">Personal portfolio deployed on AWS EC2 with Apache server configuration, SSL setup, and custom Route 53 domain routing.</p>
-                <div className="tech-tags">
-                  <span className="tech-tag">AWS EC2</span>
-                  <span className="tech-tag">Route 53</span>
-                  <span className="tech-tag">Apache</span>
-                  <span className="tech-tag">Linux</span>
-                </div>
-                <div className="project-links">
-                  <a href="#" className="project-link" onClick={(e) => e.preventDefault()}>Live Demo</a>
-                  <a href="https://github.com/durgesh885" target="_blank" rel="noopener noreferrer" className="project-link">GitHub</a>
-                </div>
+                <span className="status-badge live-on-aws">
+                  <span className="status-dot"></span>
+                  Live
+                </span>
+              </div>
+              <p className="project-desc">Personal portfolio website deployed on AWS EC2 with Apache server configuration, secure SSL certificates setup, and custom domain routing configured through Route 53.</p>
+              <p className="tech-stack-line mono">AWS EC2 · Route 53 · Apache · Linux Admin</p>
+              <div className="project-card-links">
+                <a href="https://github.com/durgesh885" target="_blank" rel="noopener noreferrer" className="project-card-link">
+                  <svg className="link-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16">
+                    <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
+                  </svg>
+                  <span>GitHub</span>
+                </a>
+                <a href="#" className="project-card-link" onClick={(e) => e.preventDefault()}>
+                  <ExternalLinkIcon />
+                  <span>Live Demo</span>
+                </a>
               </div>
             </div>
-            
+
+            {/* Project 2 */}
             <div className="project-card reveal">
-              <div className="project-image">
-                <ProjectChatIcon />
-                <span className="project-status">In Progress</span>
-              </div>
-              <div className="project-content">
-                <div className="project-category">Full Stack</div>
+              <div className="project-card-header">
                 <h3 className="project-title">Real-time Cloud Chat System</h3>
-                <p className="project-desc">Full-stack chat app with React, Tailwind CSS, Node.js and Express. Features real-time messaging with Socket.io.</p>
-                <div className="tech-tags">
-                  <span className="tech-tag">React</span>
-                  <span className="tech-tag">Tailwind</span>
-                  <span className="tech-tag">Node.js</span>
-                  <span className="tech-tag">Express</span>
-                </div>
-                <div className="project-links">
-                  <a href="#" className="project-link" onClick={(e) => e.preventDefault()}>View Code</a>
-                  <a href="https://github.com/durgesh885" target="_blank" rel="noopener noreferrer" className="project-link">GitHub</a>
-                </div>
+                <span className="status-badge in-progress">
+                  <span className="status-dot"></span>
+                  In Dev
+                </span>
+              </div>
+              <p className="project-desc">Full-stack chat application designed using React, Tailwind CSS, Node.js and Express. Features instant, real-time messaging with Socket.io web sockets.</p>
+              <p className="tech-stack-line mono">React · Tailwind CSS · Node.js · Express</p>
+              <div className="project-card-links">
+                <a href="https://github.com/durgesh885" target="_blank" rel="noopener noreferrer" className="project-card-link">
+                  <svg className="link-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16">
+                    <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
+                  </svg>
+                  <span>GitHub</span>
+                </a>
+                <a href="https://github.com/durgesh885" target="_blank" rel="noopener noreferrer" className="project-card-link">
+                  <ExternalLinkIcon />
+                  <span>View Code</span>
+                </a>
               </div>
             </div>
-            
+
+            {/* Project 3 */}
             <div className="project-card reveal">
-              <div className="project-image">
-                <ProjectWebIcon />
-                <span className="project-status">Configured</span>
-              </div>
-              <div className="project-content">
-                <div className="project-category">DevOps & Admin</div>
+              <div className="project-card-header">
                 <h3 className="project-title">AWS DevOps & Linux Server Admin</h3>
-                <p className="project-desc">Configured Apache on EC2, managed security groups, VPC networking parameters, SSH keys, and server administration.</p>
-                <div className="tech-tags">
-                  <span className="tech-tag">Apache</span>
-                  <span className="tech-tag">AWS EC2</span>
-                  <span className="tech-tag">Linux</span>
-                  <span className="tech-tag">VPC</span>
-                </div>
-                <div className="project-links">
-                  <a href="#" className="project-link" onClick={(e) => e.preventDefault()}>Details</a>
-                  <a href="https://github.com/durgesh885" target="_blank" rel="noopener noreferrer" className="project-link">GitHub</a>
-                </div>
+                <span className="status-badge configured">
+                  <span className="status-dot"></span>
+                  Configured
+                </span>
+              </div>
+              <p className="project-desc">Configured Apache proxy servers on EC2, managed custom security groups, VPC virtual networking parameters, SSH keys administration, and secure Linux server administration.</p>
+              <p className="tech-stack-line mono">Apache · AWS EC2 · Linux · VPC</p>
+              <div className="project-card-links">
+                <a href="https://github.com/durgesh885" target="_blank" rel="noopener noreferrer" className="project-card-link">
+                  <svg className="link-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16">
+                    <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
+                  </svg>
+                  <span>GitHub</span>
+                </a>
+                <a href="#" className="project-card-link" onClick={(e) => e.preventDefault()}>
+                  <ExternalLinkIcon />
+                  <span>Details</span>
+                </a>
               </div>
             </div>
-            
+
+            {/* Project 4 */}
             <div className="project-card reveal">
-              <div className="project-image">
-                <ProjectNodeIcon />
-                <span className="project-status">Building</span>
-              </div>
-              <div className="project-content">
-                <div className="project-category">MERN Stack</div>
+              <div className="project-card-header">
                 <h3 className="project-title">Cloud-Native MERN Stack App</h3>
-                <p className="project-desc">Full-fledged application using MongoDB, Express, React, and Node.js with focus on database cluster syncing.</p>
-                <div className="tech-tags">
-                  <span className="tech-tag">MongoDB</span>
-                  <span className="tech-tag">Express</span>
-                  <span className="tech-tag">React</span>
-                  <span className="tech-tag">Node.js</span>
-                </div>
-                <div className="project-links">
-                  <a href="#" className="project-link" onClick={(e) => e.preventDefault()}>In Dev</a>
-                  <a href="https://github.com/durgesh885" target="_blank" rel="noopener noreferrer" className="project-link">GitHub</a>
-                </div>
+                <span className="status-badge building">
+                  <span className="status-dot"></span>
+                  Building
+                </span>
+              </div>
+              <p className="project-desc">Full-fledged cloud application utilising MongoDB, Express, React, and Node.js with a primary focus on database cluster synchronization and replica sets routing.</p>
+              <p className="tech-stack-line mono">MongoDB · Express · React · Node.js</p>
+              <div className="project-card-links">
+                <a href="https://github.com/durgesh885" target="_blank" rel="noopener noreferrer" className="project-card-link">
+                  <svg className="link-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16">
+                    <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
+                  </svg>
+                  <span>GitHub</span>
+                </a>
+                <a href="#" className="project-card-link" onClick={(e) => e.preventDefault()}>
+                  <ExternalLinkIcon />
+                  <span>In Dev</span>
+                </a>
               </div>
             </div>
+
           </div>
         </div>
       </section>
@@ -1025,24 +971,109 @@ export default function Home() {
             <p className="section-subtitle">Open for Cloud & DevOps internships, collaborative projects, and engineering conversations</p>
           </div>
           
-          <div className="contact-grid reveal">
-            <a href="mailto:chaudharidurgesh493@gmail.com" className="contact-card">
-              <div className="contact-icon-box"><EmailIcon /></div>
-              <div className="contact-title">Email</div>
-              <div className="contact-detail">chaudharidurgesh493@gmail.com</div>
-            </a>
-            
-            <a href="https://github.com/durgesh885" target="_blank" rel="noopener noreferrer" className="contact-card">
-              <div className="contact-icon-box"><GithubIcon /></div>
-              <div className="contact-title">GitHub</div>
-              <div className="contact-detail">@durgesh885</div>
-            </a>
-            
-            <a href="https://www.linkedin.com/in/durgesh-chaudhari" target="_blank" rel="noopener noreferrer" className="contact-card">
-              <div className="contact-icon-box"><LinkedinIcon /></div>
-              <div className="contact-title">LinkedIn</div>
-              <div className="contact-detail">Durgesh Chaudhari</div>
-            </a>
+          <div className="contact-layout reveal">
+            {/* Left Side: Contact Form */}
+            <div className="contact-form-container">
+              <h3 className="contact-form-title">Send a Message ✉️</h3>
+              <form onSubmit={handleFormSubmit} className="contact-form">
+                <div className="input-group">
+                  <label htmlFor="form-name" className="mono">Name</label>
+                  <input
+                    type="text"
+                    id="form-name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="Your Name"
+                    required
+                    disabled={formStatus === "sending"}
+                  />
+                </div>
+                <div className="input-group">
+                  <label htmlFor="form-email" className="mono">Email Address</label>
+                  <input
+                    type="email"
+                    id="form-email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    placeholder="your.email@example.com"
+                    required
+                    disabled={formStatus === "sending"}
+                  />
+                </div>
+                <div className="input-group">
+                  <label htmlFor="form-message" className="mono">Message</label>
+                  <textarea
+                    id="form-message"
+                    value={formData.message}
+                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                    placeholder="Hi Durgesh, let's collaborate on a cloud project..."
+                    rows="4"
+                    required
+                    disabled={formStatus === "sending"}
+                  ></textarea>
+                </div>
+                
+                <button type="submit" className={`btn btn-primary form-submit-btn ${formStatus}`} disabled={formStatus === "sending"}>
+                  {formStatus === "idle" && <>Send Message 🚀</>}
+                  {formStatus === "sending" && (
+                    <span className="form-loading">
+                      <svg className="spinner" viewBox="0 0 24 24" style={{ width: "18px", height: "18px", animation: "rotateSpinner 1s linear infinite", marginRight: "8px" }}>
+                        <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" strokeWidth="3" strokeDasharray="42" strokeDashoffset="14" />
+                      </svg>
+                      Deploying Message...
+                    </span>
+                  )}
+                  {formStatus === "success" && <>Dispatched Successfully! ✅</>}
+                </button>
+              </form>
+              
+              {formStatus === "success" && (
+                <div className="form-success-banner mono" style={{ marginTop: "15px", fontSize: "12px", background: "rgba(16, 185, 129, 0.05)", border: "1px solid rgba(16, 185, 129, 0.2)", padding: "10px 14px", borderRadius: "8px", color: "#a7f3d0" }}>
+                  <span className="green-text">[OK]</span> SQS_Queue: Message dispatched to chaudharidurgesh493@gmail.com
+                </div>
+              )}
+            </div>
+
+            {/* Right Side: Quick Connect Cards */}
+            <div className="contact-info-panel">
+              <h3 className="contact-info-title">Connectivity Hub 🌐</h3>
+              <p className="contact-info-desc">Feel free to reach out directly via email or check out my profiles on LinkedIn and GitHub.</p>
+              
+              <div className="info-cards-list">
+                <a href="mailto:chaudharidurgesh493@gmail.com" className="info-card-item">
+                  <div className="info-card-icon"><EmailIcon /></div>
+                  <div className="info-card-content">
+                    <div className="info-card-label mono">Direct Mail</div>
+                    <div className="info-card-value">chaudharidurgesh493@gmail.com</div>
+                  </div>
+                  <span className="arrow-icon">→</span>
+                </a>
+                
+                <a href="https://www.linkedin.com/in/durgesh-chaudhari" target="_blank" rel="noopener noreferrer" className="info-card-item">
+                  <div className="info-card-icon"><LinkedinIcon /></div>
+                  <div className="info-card-content">
+                    <div className="info-card-label mono">LinkedIn</div>
+                    <div className="info-card-value">Durgesh Chaudhari</div>
+                  </div>
+                  <span className="arrow-icon">→</span>
+                </a>
+                
+                <a href="https://github.com/durgesh885" target="_blank" rel="noopener noreferrer" className="info-card-item">
+                  <div className="info-card-icon"><GithubIcon /></div>
+                  <div className="info-card-content">
+                    <div className="info-card-label mono">GitHub</div>
+                    <div className="info-card-value">@durgesh885</div>
+                  </div>
+                  <span className="arrow-icon">→</span>
+                </a>
+              </div>
+
+              {/* Location Badge */}
+              <div className="location-card mono" style={{ marginTop: "30px" }}>
+                <div className="location-dot animate-pulse"></div>
+                <span>Based in India | GMT +5:30</span>
+              </div>
+            </div>
           </div>
         </div>
       </section>
