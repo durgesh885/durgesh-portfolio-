@@ -52,12 +52,6 @@ const ProjectNodeIcon = () => (
   </svg>
 );
 
-const EduSchoolIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="28" height="28">
-    <path d="M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82zM12 3L1 9l11 6 9-4.91V17h2V9L12 3z" />
-  </svg>
-);
-
 const EmailIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="30" height="30">
     <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
@@ -96,17 +90,62 @@ export default function Home() {
   // Dynamic Loader Progress State
   const [progress, setProgress] = useState(0);
 
+  // DevOps live CloudWatch logs simulation state
+  const [logs, setLogs] = useState([
+    "[SYS] Route53 routing request to active server group.",
+    "[SYS] VPC flow logs verified. Security check passed.",
+    "[CICD] Build success for durgesh-portfolio:latest.",
+    "[SYS] AWS CloudWatch agent status: RUNNING."
+  ]);
+
+  // Loader log sequence targets
+  const loaderLogs = [
+    { pct: 0, text: "[SYSTEM] Booting Durgesh Cloud Engine v3.0..." },
+    { pct: 15, text: "[NETWORK] Handshaking with AWS Route53 DNS gateway..." },
+    { pct: 35, text: "[COMPUTE] Allocating EC2-t3.medium cluster nodes..." },
+    { pct: 55, text: "[STORAGE] Mounting secure S3 asset buckets (SSL Enabled)..." },
+    { pct: 75, text: "[DATABASE] Synchronizing MongoDB and relational databases..." },
+    { pct: 90, text: "[PIPELINE] Deploying CI/CD container flow targets..." },
+    { pct: 100, text: "[SUCCESS] All cloud subsystems operational. Launching portfolio..." }
+  ];
+
   // Set mount safety
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // DevOps Logs simulation interval
+  useEffect(() => {
+    if (!mounted) return;
+    const devopsLogsList = [
+      "[SYS] Route53 routing request to active server group.",
+      "[SYS] VPC flow logs verified. Security check passed.",
+      "[CICD] Build success for durgesh-portfolio:latest.",
+      "[SYS] AWS CloudWatch agent status: RUNNING.",
+      "[SYS] EC2 CPU utilization stable at 24.5%.",
+      "[SYS] S3 bucket sync: Backup completed successfully.",
+      "[SYS] DB connection pool optimized (12 active).",
+      "[SYS] CloudFront edge caches invalidated.",
+      "[CICD] Deploying container v2.0.4 to cluster...",
+      "[SYS] Health check status 200 OK for target-group."
+    ];
+
+    const interval = setInterval(() => {
+      setLogs((prev) => {
+        const nextLog = devopsLogsList[Math.floor(Math.random() * devopsLogsList.length)];
+        return [...prev.slice(1), nextLog];
+      });
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [mounted]);
 
   // Dynamic Loader Progress Loop
   useEffect(() => {
     if (!mounted) return;
     
     const startTime = Date.now();
-    const duration = 2000; // 2 seconds loading duration
+    const duration = 2800; // 2.8 seconds loading boot sequence
     let animationFrameId;
 
     const updateLoader = () => {
@@ -119,7 +158,7 @@ export default function Home() {
       } else {
         setTimeout(() => {
           setLoaderHidden(true);
-        }, 300); // smooth fade transition
+        }, 400); // smooth fade transition
       }
     };
 
@@ -131,7 +170,12 @@ export default function Home() {
   useEffect(() => {
     if (!mounted) return;
 
-    const roles = ['MCA Student', 'Full Stack Developer', 'MERN Stack Learner', 'AWS Cloud Enthusiast', 'Problem Solver'];
+    const roles = [
+      'AWS Cloud Specialist',
+      'DevOps Engineer',
+      'MCA Software Engineer',
+      'Infrastructure Builder'
+    ];
     let roleIndex = 0;
     let charIndex = 0;
     let isDeleting = false;
@@ -188,7 +232,7 @@ export default function Home() {
     const observerOptions = {
       root: null,
       threshold: 0.2,
-      rootMargin: "-120px 0px -40% 0px" // offset to trigger active state near viewport top
+      rootMargin: "-120px 0px -40% 0px"
     };
 
     const observer = new IntersectionObserver((entries) => {
@@ -237,7 +281,7 @@ export default function Home() {
     canvasContainerRef.current.appendChild(renderer.domElement);
 
     // Lights
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
     scene.add(ambientLight);
 
     const directionalLight1 = new THREE.DirectionalLight(0x00f0ff, 1.5);
@@ -248,38 +292,61 @@ export default function Home() {
     pointLight.position.set(-4, 2, 2);
     scene.add(pointLight);
 
-    // Group for Dual Torus Knot
-    const torusGroup = new THREE.Group();
-    scene.add(torusGroup);
+    // Group for Cyber Core
+    const coreGroup = new THREE.Group();
+    scene.add(coreGroup);
 
-    // Rotating 3D Torus Knot Geometry (Outer Premium Wireframe)
-    const torusGeometry = new THREE.TorusKnotGeometry(1.3, 0.35, 150, 16);
-    const torusMaterial = new THREE.MeshPhongMaterial({
+    // 1. Outer Icosahedron (Faceted Wireframe Reactor)
+    const outerGeometry = new THREE.IcosahedronGeometry(1.3, 1);
+    const outerMaterial = new THREE.MeshPhongMaterial({
       color: 0x00f0ff,
       wireframe: true,
       transparent: true,
-      opacity: 0.22,
-      shininess: 120
+      opacity: 0.25,
+      shininess: 100
     });
-    const torusKnot = new THREE.Mesh(torusGeometry, torusMaterial);
-    torusGroup.add(torusKnot);
+    const outerCore = new THREE.Mesh(outerGeometry, outerMaterial);
+    coreGroup.add(outerCore);
 
-    // Inner Solid Faceted Glowing Core
-    const innerGeometry = new THREE.TorusKnotGeometry(1.22, 0.2, 100, 12);
+    // 2. Inner Faceted Crystalline Core
+    const innerGeometry = new THREE.IcosahedronGeometry(0.65, 0); // flat facets
     const innerMaterial = new THREE.MeshPhongMaterial({
       color: 0x0066ff,
       transparent: true,
-      opacity: 0.3,
+      opacity: 0.38,
       shininess: 150,
-      emissive: 0x001166,
+      emissive: 0x002288,
       flatShading: true
     });
-    const innerTorusKnot = new THREE.Mesh(innerGeometry, innerMaterial);
-    torusGroup.add(innerTorusKnot);
+    const innerCore = new THREE.Mesh(innerGeometry, innerMaterial);
+    coreGroup.add(innerCore);
+
+    // 3. Floating Saturn Cyber Rings
+    const ringGeometry1 = new THREE.TorusGeometry(1.8, 0.02, 8, 64);
+    const ringMaterial1 = new THREE.MeshBasicMaterial({
+      color: 0x00f0ff,
+      transparent: true,
+      opacity: 0.25,
+      blending: THREE.AdditiveBlending
+    });
+    const ring1 = new THREE.Mesh(ringGeometry1, ringMaterial1);
+    ring1.rotation.x = Math.PI / 2;
+    coreGroup.add(ring1);
+
+    const ringGeometry2 = new THREE.TorusGeometry(2.1, 0.015, 8, 64);
+    const ringMaterial2 = new THREE.MeshBasicMaterial({
+      color: 0x00ffd2,
+      transparent: true,
+      opacity: 0.2,
+      blending: THREE.AdditiveBlending
+    });
+    const ring2 = new THREE.Mesh(ringGeometry2, ringMaterial2);
+    ring2.rotation.y = Math.PI / 4;
+    coreGroup.add(ring2);
 
     // Particle field (Swirling Cyber Dust)
     const particlesGeometry = new THREE.BufferGeometry();
-    const particlesCount = 250;
+    const particlesCount = 280;
     const posArray = new Float32Array(particlesCount * 3);
 
     for (let i = 0; i < particlesCount * 3; i++) {
@@ -333,15 +400,19 @@ export default function Home() {
 
     document.addEventListener("mousemove", handleMouseMove);
 
+    // Target position for the Core in 3D Space
+    const targetGroupPos = new THREE.Vector3();
+
     // Handle responsiveness on sizing
     const checkModelVisibility = () => {
       if (window.innerWidth < 968) {
-        torusGroup.position.set(0, 1.8, -1.5); // Center and push back on mobile
-        torusGroup.scale.set(0.8, 0.8, 0.8);
+        targetGroupPos.set(0, 1.4, -1.5); // centered on mobile
+        coreGroup.scale.set(0.85, 0.85, 0.85);
       } else {
-        torusGroup.position.set(2.4, 1.2, -2.0); // Shifted higher and to the right to float beautifully beside the card
-        torusGroup.scale.set(1, 1, 1);
+        targetGroupPos.set(2.4, 0.6, -2.0); // aligned on desktop right
+        coreGroup.scale.set(1.1, 1.1, 1.1);
       }
+      coreGroup.position.copy(targetGroupPos);
     };
     checkModelVisibility();
 
@@ -360,42 +431,48 @@ export default function Home() {
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);
 
-      targetX = mouseX * 0.4;
-      targetY = mouseY * 0.4;
-
-      // Smooth camera interpolation
-      camera.position.x += (targetX - camera.position.x) * 0.04;
-      camera.position.y += (-targetY - camera.position.y) * 0.04;
-      camera.lookAt(scene.position);
+      targetX = mouseX * 0.3;
+      targetY = mouseY * 0.3;
 
       // Smooth scroll interpolation (damping)
       const currentScroll = scrollRef.current;
-      targetScrollY += (currentScroll - targetScrollY) * 0.06;
+      targetScrollY += (currentScroll - targetScrollY) * 0.05;
       
-      // Calculate 3D coordinate parallax offset
-      const scrollFactor = targetScrollY * 0.006;
+      // Calculate scroll rotation angle for orbital camera sweep
+      const scrollAngle = targetScrollY * 0.0007; 
+      const radius = 6.0;
 
-      // Rotate torus group
-      torusGroup.rotation.y += 0.003;
-      torusGroup.rotation.x += 0.002;
+      // Orbit camera around coreGroup target position as user scrolls
+      camera.position.x = targetGroupPos.x + Math.sin(scrollAngle + targetX) * radius;
+      camera.position.z = targetGroupPos.z + Math.cos(scrollAngle + targetX) * radius;
+      camera.position.y = targetGroupPos.y + 0.4 + (targetScrollY * 0.0002) - targetY;
       
-      // Apply parallax translation on Y-axis (moves upward as we scroll down)
-      torusGroup.position.y = Math.sin(Date.now() * 0.001) * 0.15 + (window.innerWidth < 968 ? 1.8 : 1.2) - scrollFactor;
+      // Keep looking directly at the core reactor to keep it centered on its relative position
+      camera.lookAt(targetGroupPos.x - (window.innerWidth < 968 ? 0 : 1.8), targetGroupPos.y, targetGroupPos.z);
 
-      // Parallax translation on particles and grid to create layers depth
-      particlesMesh.position.y = -scrollFactor * 0.3;
-      gridMesh.position.y = -3.5 - scrollFactor * 0.15;
+      // Rotate core elements
+      outerCore.rotation.y += 0.003 + (currentScroll * 0.00001); // spins slightly faster on scroll!
+      outerCore.rotation.x += 0.002;
+      
+      innerCore.rotation.y -= 0.005 + (currentScroll * 0.00001);
+      innerCore.rotation.z += 0.003;
+
+      ring1.rotation.z += 0.008;
+      ring2.rotation.x -= 0.006;
+
+      // Float Y offset slightly over time
+      coreGroup.position.y = targetGroupPos.y + Math.sin(Date.now() * 0.001) * 0.12;
 
       // Dynamic color-shifting restricted to cyan-blue spectrum (no red/purple)
       const time = Date.now() * 0.0001;
       const hueOuter = 0.5 + Math.sin(time * 0.5) * 0.08; 
-      torusMaterial.color.setHSL(hueOuter, 1.0, 0.5); 
+      outerMaterial.color.setHSL(hueOuter, 1.0, 0.5); 
       
       const hueInner = 0.58 + Math.cos(time * 0.5) * 0.08; 
       innerMaterial.color.setHSL(hueInner, 0.85, 0.5); 
-      innerMaterial.emissive.setHSL(hueInner, 0.85, 0.25);
+      innerMaterial.emissive.setHSL(hueInner, 0.85, 0.2);
 
-      // Waving Cyber Grid animation (harmonic sine/cosine ripples)
+      // Waving Cyber Grid animation
       const gridPositions = gridGeometry.attributes.position.array;
       const gridTime = Date.now() * 0.0015;
       for (let i = 0; i < gridPositions.length; i += 3) {
@@ -446,20 +523,24 @@ export default function Home() {
       window.removeEventListener("resize", handleResize);
 
       // Dispose Geometries
-      torusGeometry.dispose();
+      outerGeometry.dispose();
       innerGeometry.dispose();
+      ringGeometry1.dispose();
+      ringGeometry2.dispose();
       particlesGeometry.dispose();
       gridGeometry.dispose();
 
       // Dispose Materials
-      torusMaterial.dispose();
+      outerMaterial.dispose();
       innerMaterial.dispose();
+      ringMaterial1.dispose();
+      ringMaterial2.dispose();
       particlesMaterial.dispose();
       gridMaterial.dispose();
 
       // Dispose Meshes from Scene
       scene.remove(particlesMesh);
-      scene.remove(torusGroup);
+      scene.remove(coreGroup);
       scene.remove(gridMesh);
 
       if (canvasContainerRef.current && renderer.domElement) {
@@ -490,16 +571,36 @@ export default function Home() {
     <>
       {/* Loading Screen */}
       <div className={`loader ${loaderHidden ? "hidden" : ""}`} id="loader">
-        <div className="loader-minimal-content">
-          <div className="loader-logo mono">&lt;DURGESH /&gt;</div>
+        <div className="loader-console">
+          <div className="console-header">
+            <span className="console-title mono">AWS Cloud DevOps Console - Booting...</span>
+          </div>
+          <div className="console-screen mono">
+            {loaderLogs.map((log, index) => {
+              if (progress >= log.pct) {
+                return (
+                  <div key={index} className="console-log-line">
+                    <span className="log-success">[OK]</span> {log.text}
+                  </div>
+                );
+              }
+              return null;
+            })}
+            <div className="console-input-line">
+              <span className="console-prompt">$</span> <span className="blinking-cursor">_</span>
+            </div>
+          </div>
           <div className="loader-line-container">
             <div className="loader-line" style={{ width: `${progress}%` }}></div>
           </div>
+          <div className="loader-progress-pct mono">{progress}%</div>
         </div>
       </div>
 
       {/* Three.js Canvas Container */}
       <div id="canvas-container" ref={canvasContainerRef}></div>
+
+
 
       {/* Navigation */}
       <nav id="navbar" className={navbarScrolled ? "scrolled" : ""}>
@@ -630,11 +731,11 @@ export default function Home() {
       <section className="hero" id="home">
         <div className="hero-content">
           <div className="hero-text">
-            <div className="hero-badge mono">☁️ AWS Cloud Enthusiast</div>
+            <div className="hero-badge mono">☁️ DevOps & AWS Cloud</div>
             <h1>Hi, I'm<br />Durgesh 🚀</h1>
-            <div className="hero-role mono" id="typeText">{typeText || "MCA Student"}</div>
+            <div className="hero-role mono" id="typeText">{typeText || "DevOps Engineer"}</div>
             <p className="hero-desc">
-              Aspiring <strong>Full Stack Developer</strong> specializing in <strong>MERN Stack</strong> and <strong>AWS Cloud</strong>. I build modern web applications and deploy them on real-world cloud infrastructure.
+              Aspiring <strong>DevOps & AWS Cloud Engineer</strong> specializing in cloud architecture design, server deployment, and automated <strong>CI/CD pipelines</strong>. I design scalable virtual infrastructure and build full-stack web applications.
             </p>
             
             <div className="hero-stats">
@@ -643,12 +744,12 @@ export default function Home() {
                 <span className="stat-label">Pursuing</span>
               </div>
               <div className="stat-box">
-                <span className="stat-value mono">MERN</span>
-                <span className="stat-label">Stack</span>
-              </div>
-              <div className="stat-box">
                 <span className="stat-value mono">AWS</span>
                 <span className="stat-label">Cloud</span>
+              </div>
+              <div className="stat-box">
+                <span className="stat-value mono">CI/CD</span>
+                <span className="stat-label">Automation</span>
               </div>
             </div>
             
@@ -658,25 +759,26 @@ export default function Home() {
             </div>
           </div>
           
-          {/* Holographic Dracula-themed Card */}
+          {/* Holographic Dracula-themed Code Card */}
           <div className="holo-card">
             <div className="code-header">
               <div className="dot red"></div>
               <div className="dot yellow"></div>
               <div className="dot green"></div>
               <span style={{ color: "#64748b", marginLeft: "10px", fontSize: "14px", fontFamily: "'JetBrains Mono', monospace" }}>
-                durgesh@portfolio: ~/about-me
+                durgesh@aws-ops: ~/devops-config
               </span>
             </div>
             <div className="code-body">
-              <div className="code-row"><span className="line-num">1</span><span className="code-line"><span className="keyword">const</span> <span className="var">durgesh</span> = &#123;</span></div>
-              <div className="code-row"><span className="line-num">2</span><span className="code-line">&nbsp;&nbsp;education: <span className="string">'MCA (Pursuing)'</span>,</span></div>
-              <div className="code-row"><span className="line-num">3</span><span className="code-line">&nbsp;&nbsp;stack: [<span className="string">'MongoDB'</span>, <span className="string">'Express'</span>,</span></div>
-              <div className="code-row"><span className="line-num">4</span><span className="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="string">'React'</span>, <span style={{ color: "#ff79c6" }}>'Node.js'</span>],</span></div>
-              <div className="code-row"><span className="line-num">5</span><span className="code-line">&nbsp;&nbsp;cloud: <span className="string">'AWS EC2, S3'</span>,</span></div>
-              <div className="code-row"><span className="line-num">6</span><span className="code-line">&nbsp;&nbsp;learning: <span className="string">'DevOps'</span>,</span></div>
-              <div className="code-row"><span className="line-num">7</span><span className="code-line">&nbsp;&nbsp;passion: <span className="string">'Building Things'</span></span></div>
-              <div className="code-row"><span className="line-num">8</span><span className="code-line">&#125;;</span></div>
+              <div className="code-row"><span className="line-num">1</span><span className="code-line"><span className="keyword">const</span> <span className="var">engineer</span> = &#123;</span></div>
+              <div className="code-row"><span className="line-num">2</span><span className="code-line">&nbsp;&nbsp;name: <span className="string">'Durgesh Chaudhari'</span>,</span></div>
+              <div className="code-row"><span className="line-num">3</span><span className="code-line">&nbsp;&nbsp;role: <span className="string">'Cloud & DevOps Engineer'</span>,</span></div>
+              <div className="code-row"><span className="line-num">4</span><span className="code-line">&nbsp;&nbsp;stack: [<span className="string">'MongoDB'</span>, <span className="string">'Express'</span>,</span></div>
+              <div className="code-row"><span className="line-num">5</span><span className="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="string">'React'</span>, <span style={{ color: "#ff79c6" }}>'Node.js'</span>],</span></div>
+              <div className="code-row"><span className="line-num">6</span><span className="code-line">&nbsp;&nbsp;cloud: [<span className="string">'AWS EC2'</span>, <span className="string">'S3'</span>, <span className="string">'Route53'</span>, <span className="string">'VPC'</span>],</span></div>
+              <div className="code-row"><span className="line-num">7</span><span className="code-line">&nbsp;&nbsp;devops: [<span className="string">'CI/CD'</span>, <span className="string">'Linux Admin'</span>, <span className="string">'Apache'</span>],</span></div>
+              <div className="code-row"><span className="line-num">8</span><span className="code-line">&nbsp;&nbsp;status: <span className="string">'Nominal / Ready to Deploy'</span></span></div>
+              <div className="code-row"><span className="line-num">9</span><span className="code-line">&#125;;</span></div>
             </div>
           </div>
           
@@ -702,42 +804,41 @@ export default function Home() {
           <div className="skills-grid">
             <div className="skill-card reveal">
               <div className="skill-cat-header">
-                <div className="skill-cat-icon"><CodeIcon /></div>
-                <h3 className="skill-cat-title">Frontend</h3>
+                <div className="skill-cat-icon"><CloudIcon /></div>
+                <h3 className="skill-cat-title">Cloud Infrastructure</h3>
               </div>
               <div className="skill-list">
-                <div className="skill-item"><span className="skill-name">HTML5</span><span className="skill-level">Advanced</span></div>
-                <div className="skill-item"><span className="skill-name">CSS3</span><span className="skill-level">Advanced</span></div>
-                <div className="skill-item"><span className="skill-name">JavaScript (ES6+)</span><span className="skill-level">Intermediate</span></div>
-                <div className="skill-item"><span className="skill-name">React.js</span><span className="skill-level">Learning</span></div>
-                <div className="skill-item"><span className="skill-name">Tailwind CSS</span><span className="skill-level">Learning</span></div>
+                <div className="skill-item"><span className="skill-name">AWS EC2 / S3</span><span className="skill-level">Hands-on</span></div>
+                <div className="skill-item"><span className="skill-name">AWS Route 53 / VPC</span><span className="skill-level">Hands-on</span></div>
+                <div className="skill-item"><span className="skill-name">Security Groups & IAM</span><span className="skill-level">Intermediate</span></div>
+                <div className="skill-item"><span className="skill-name">Linux System Admin</span><span className="skill-level">Intermediate</span></div>
+                <div className="skill-item"><span className="skill-name">Apache Configuration</span><span className="skill-level">Configured</span></div>
               </div>
             </div>
             
             <div className="skill-card reveal">
               <div className="skill-cat-header">
                 <div className="skill-cat-icon"><BackendIcon /></div>
-                <h3 className="skill-cat-title">Backend</h3>
+                <h3 className="skill-cat-title">DevOps & Admin</h3>
               </div>
               <div className="skill-list">
-                <div className="skill-item"><span className="skill-name">Node.js</span><span className="skill-level">Intermediate</span></div>
-                <div className="skill-item"><span className="skill-name">Express.js</span><span className="skill-level">Intermediate</span></div>
-                <div className="skill-item"><span className="skill-name">REST APIs</span><span className="skill-level">Intermediate</span></div>
-                <div className="skill-item"><span className="skill-name">MongoDB</span><span className="skill-level">Intermediate</span></div>
+                <div className="skill-item"><span className="skill-name">Git & GitHub versioning</span><span className="skill-level">Regular</span></div>
+                <div className="skill-item"><span className="skill-name">Bash Shell Scripting</span><span className="skill-level">Exploring</span></div>
+                <div className="skill-item"><span className="skill-name">CI/CD Pipeline Concepts</span><span className="skill-level">Learning</span></div>
+                <div className="skill-item"><span className="skill-name">Docker Containers</span><span className="skill-level">Beginning</span></div>
               </div>
             </div>
             
             <div className="skill-card reveal">
               <div className="skill-cat-header">
-                <div className="skill-cat-icon"><CloudIcon /></div>
-                <h3 className="skill-cat-title">Cloud & Tools</h3>
+                <div className="skill-cat-icon"><CodeIcon /></div>
+                <h3 className="skill-cat-title">Frontend Stack</h3>
               </div>
               <div className="skill-list">
-                <div className="skill-item"><span className="skill-name">AWS EC2</span><span className="skill-level">Hands-on</span></div>
-                <div className="skill-item"><span className="skill-name">AWS S3</span><span className="skill-level">Hands-on</span></div>
-                <div className="skill-item"><span className="skill-name">Git & GitHub</span><span className="skill-level">Regular</span></div>
-                <div className="skill-item"><span className="skill-name">Linux</span><span className="skill-level">Intermediate</span></div>
-                <div className="skill-item"><span className="skill-name">Apache</span><span className="skill-level">Configured</span></div>
+                <div className="skill-item"><span className="skill-name">JavaScript (ES6+)</span><span className="skill-level">Intermediate</span></div>
+                <div className="skill-item"><span className="skill-name">HTML5 & CSS3</span><span className="skill-level">Advanced</span></div>
+                <div className="skill-item"><span className="skill-name">React.js Framework</span><span className="skill-level">Learning</span></div>
+                <div className="skill-item"><span className="skill-name">Tailwind CSS</span><span className="skill-level">Learning</span></div>
               </div>
             </div>
             
@@ -747,9 +848,9 @@ export default function Home() {
                 <h3 className="skill-cat-title">Currently Learning</h3>
               </div>
               <div className="skill-list">
-                <div className="skill-item"><span className="skill-name">MERN Integration</span><span className="skill-level">In Progress</span></div>
-                <div className="skill-item"><span className="skill-name">DevOps Basics</span><span className="skill-level">Exploring</span></div>
-                <div className="skill-item"><span className="skill-name">System Design</span><span className="skill-level">Beginning</span></div>
+                <div className="skill-item"><span className="skill-name">Node.js & Express</span><span className="skill-level">Intermediate</span></div>
+                <div className="skill-item"><span className="skill-name">MongoDB Integration</span><span className="skill-level">Intermediate</span></div>
+                <div className="skill-item"><span className="skill-name">Infrastructure as Code (IaC)</span><span className="skill-level">Exploring</span></div>
               </div>
             </div>
           </div>
@@ -768,18 +869,18 @@ export default function Home() {
           <div className="projects-grid">
             <div className="project-card reveal">
               <div className="project-image">
-                <ProjectWebIcon />
+                <ProjectCloudIcon />
                 <span className="project-status">Live on AWS</span>
               </div>
               <div className="project-content">
                 <div className="project-category">Cloud Deployment</div>
-                <h3 className="project-title">Portfolio Website on AWS EC2</h3>
-                <p className="project-desc">Personal portfolio deployed on AWS EC2 with Apache server configuration, SSL setup, and custom domain.</p>
+                <h3 className="project-title">Automated Web Server Hosting on AWS</h3>
+                <p className="project-desc">Personal portfolio deployed on AWS EC2 with Apache server configuration, SSL setup, and custom Route 53 domain routing.</p>
                 <div className="tech-tags">
-                  <span className="tech-tag">HTML5</span>
-                  <span className="tech-tag">CSS3</span>
                   <span className="tech-tag">AWS EC2</span>
+                  <span className="tech-tag">Route 53</span>
                   <span className="tech-tag">Apache</span>
+                  <span className="tech-tag">Linux</span>
                 </div>
                 <div className="project-links">
                   <a href="#" className="project-link" onClick={(e) => e.preventDefault()}>Live Demo</a>
@@ -795,7 +896,7 @@ export default function Home() {
               </div>
               <div className="project-content">
                 <div className="project-category">Full Stack</div>
-                <h3 className="project-title">Real-time Chat Application</h3>
+                <h3 className="project-title">Real-time Cloud Chat System</h3>
                 <p className="project-desc">Full-stack chat app with React, Tailwind CSS, Node.js and Express. Features real-time messaging with Socket.io.</p>
                 <div className="tech-tags">
                   <span className="tech-tag">React</span>
@@ -812,18 +913,18 @@ export default function Home() {
             
             <div className="project-card reveal">
               <div className="project-image">
-                <ProjectCloudIcon />
-                <span className="project-status">Deployed</span>
+                <ProjectWebIcon />
+                <span className="project-status">Configured</span>
               </div>
               <div className="project-content">
-                <div className="project-category">Web Hosting</div>
-                <h3 className="project-title">Static Website Hosting</h3>
-                <p className="project-desc">Configured Apache on EC2, learned SSH access, security groups, Linux server management, and SSL certificates.</p>
+                <div className="project-category">DevOps & Admin</div>
+                <h3 className="project-title">AWS DevOps & Linux Server Admin</h3>
+                <p className="project-desc">Configured Apache on EC2, managed security groups, VPC networking parameters, SSH keys, and server administration.</p>
                 <div className="tech-tags">
                   <span className="tech-tag">Apache</span>
                   <span className="tech-tag">AWS EC2</span>
                   <span className="tech-tag">Linux</span>
-                  <span className="tech-tag">SSH</span>
+                  <span className="tech-tag">VPC</span>
                 </div>
                 <div className="project-links">
                   <a href="#" className="project-link" onClick={(e) => e.preventDefault()}>Details</a>
@@ -839,8 +940,8 @@ export default function Home() {
               </div>
               <div className="project-content">
                 <div className="project-category">MERN Stack</div>
-                <h3 className="project-title">MERN Stack Application</h3>
-                <p className="project-desc">Full-fledged application using MongoDB, Express, React, and Node.js with authentication and cloud deployment.</p>
+                <h3 className="project-title">Cloud-Native MERN Stack App</h3>
+                <p className="project-desc">Full-fledged application using MongoDB, Express, React, and Node.js with focus on database cluster syncing.</p>
                 <div className="tech-tags">
                   <span className="tech-tag">MongoDB</span>
                   <span className="tech-tag">Express</span>
@@ -863,19 +964,19 @@ export default function Home() {
           <div className="section-header reveal">
             <span className="section-tag">About Me</span>
             <h2 className="section-title">My Journey</h2>
-            <p className="section-subtitle">From BCA graduate to aspiring Full Stack Developer</p>
+            <p className="section-subtitle">From BCA graduate to aspiring DevOps & Cloud Infrastructure Engineer</p>
           </div>
           
           <div className="about-container reveal">
             <div className="about-content">
               <p className="about-text">
-                I am <strong>Durgesh Chaudhari</strong>, currently pursuing <strong>Master of Computer Applications (MCA)</strong> after completing my BCA. I am passionate about Web Development, Cloud Computing, and DevOps.
+                I am <strong>Durgesh Chaudhari</strong>, currently pursuing my <strong>Master of Computer Applications (MCA)</strong>. I am passionate about Cloud Architectures, automated deployments, Linux systems, and DevOps engineering.
               </p>
               <p className="about-text">
-                I started my journey with frontend technologies like <strong>HTML, CSS, and JavaScript</strong>, and gradually moved into backend development using <strong>Node.js</strong> and <strong>MongoDB</strong>. Currently, I am focusing on becoming a Full Stack Developer using the <strong>MERN Stack</strong>.
+                My software journey began with standard web development. As I built and integrated backend APIs, I became intrigued by *where* and *how* code runs. This led me straight into <strong>AWS Cloud Computing</strong> and the principles of <strong>DevOps automation</strong>.
               </p>
               <p className="about-text">
-                Along with development, I am actively learning <strong>AWS Cloud services</strong> such as EC2 and S3, and exploring DevOps concepts to understand deployment, scalability, and real-world infrastructure. I believe in <strong>learning by building</strong>.
+                I believe in **Infrastructure as Code** and hands-on system building. Deploying portfolio items, configuring SSL certificates, managing DNS entries on Route53, and configuring web server proxies are steps towards my goal of architecting highly available systems.
               </p>
               
               <div className="education-timeline">
@@ -890,8 +991,8 @@ export default function Home() {
                     </div>
                     <p className="timeline-sub">Currently Pursuing</p>
                     <ul className="timeline-details">
-                      <li>Focusing on advanced computer science concepts, software architectures, REST APIs, and database engineering.</li>
-                      <li>Applying theoretical knowledge to build and host full-stack applications with MERN Stack and AWS services.</li>
+                      <li>Studying advanced algorithms, distributed computing architectures, network security, and database systems.</li>
+                      <li>Applying coursework to practical deployment patterns: setting up cloud servers, configuring network bridges, and REST API scalability.</li>
                     </ul>
                   </div>
 
@@ -903,8 +1004,8 @@ export default function Home() {
                     </div>
                     <p className="timeline-sub">Completed</p>
                     <ul className="timeline-details">
-                      <li>Gained fundamental software development knowledge in C, Java, SQL, and classic web design (HTML, CSS, JS).</li>
-                      <li>Developed academic projects that built a solid core of object-oriented programming and logic design.</li>
+                      <li>Gained robust foundation in OOP (Java, C++), database systems (SQL), and structural computer networks.</li>
+                      <li>Built and hosted fundamental academic projects, developing coding logic and system analysis capabilities.</li>
                     </ul>
                   </div>
 
@@ -921,7 +1022,7 @@ export default function Home() {
           <div className="section-header reveal">
             <span className="section-tag">Get In Touch</span>
             <h2 className="section-title">Let's Connect</h2>
-            <p className="section-subtitle">Open for internships, projects, and collaboration opportunities</p>
+            <p className="section-subtitle">Open for Cloud & DevOps internships, collaborative projects, and engineering conversations</p>
           </div>
           
           <div className="contact-grid reveal">
