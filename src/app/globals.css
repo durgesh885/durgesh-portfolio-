@@ -2,8 +2,8 @@
 
 :root {
     --primary: #00f0ff;      /* Electric Cyan */
-    --secondary: #a855f7;    /* Neon Purple */
-    --accent: #ec4899;       /* Pink Flare */
+    --secondary: #0066ff;    /* Neon Purple */
+    --accent: #00ffd2;       /* Pink Flare */
     --dark: #090d16;         /* Space Dark */
     --darker: #030712;       /* Deep Cosmic Black */
     --text-main: #f3f4f6;
@@ -400,12 +400,12 @@ nav.scrolled {
 .btn-primary {
     background: linear-gradient(135deg, var(--secondary), var(--accent));
     color: white;
-    box-shadow: 0 10px 30px rgba(168, 85, 247, 0.35);
+    box-shadow: 0 10px 30px rgba(0, 102, 255, 0.35);
 }
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 15px 40px rgba(168, 85, 247, 0.5);
+    box-shadow: 0 15px 40px rgba(0, 102, 255, 0.5);
 }
 
 .btn-secondary {
@@ -554,10 +554,10 @@ section {
 .skill-card.cloud-theme:hover { border-color: rgba(0, 240, 255, 0.35); }
 
 .skill-card.devops-theme::before { background: var(--secondary); }
-.skill-card.devops-theme:hover { border-color: rgba(168, 85, 247, 0.35); }
+.skill-card.devops-theme:hover { border-color: rgba(0, 102, 255, 0.35); }
 
 .skill-card.frontend-theme::before { background: var(--accent); }
-.skill-card.frontend-theme:hover { border-color: rgba(236, 72, 153, 0.35); }
+.skill-card.frontend-theme:hover { border-color: rgba(0, 240, 255, 0.35); }
 
 .skill-card.learning-theme::before { background: #f59e0b; }
 .skill-card.learning-theme:hover { border-color: rgba(245, 158, 11, 0.35); }
@@ -587,8 +587,8 @@ section {
 }
 
 .skill-card.cloud-theme:hover .skill-cat-icon { background: rgba(0, 240, 255, 0.08); border-color: rgba(0, 240, 255, 0.2); }
-.skill-card.devops-theme:hover .skill-cat-icon { background: rgba(168, 85, 247, 0.08); border-color: rgba(168, 85, 247, 0.2); }
-.skill-card.frontend-theme:hover .skill-cat-icon { background: rgba(236, 72, 153, 0.08); border-color: rgba(236, 72, 153, 0.2); }
+.skill-card.devops-theme:hover .skill-cat-icon { background: rgba(0, 102, 255, 0.08); border-color: rgba(0, 102, 255, 0.2); }
+.skill-card.frontend-theme:hover .skill-cat-icon { background: rgba(0, 240, 255, 0.08); border-color: rgba(0, 240, 255, 0.2); }
 .skill-card.learning-theme:hover .skill-cat-icon { background: rgba(245, 158, 11, 0.08); border-color: rgba(245, 158, 11, 0.2); }
 
 .skill-cat-icon svg {
@@ -639,16 +639,16 @@ section {
 .skill-card.devops-theme .skill-badge:hover {
     border-color: var(--secondary);
     color: white;
-    background: rgba(168, 85, 247, 0.08);
-    box-shadow: 0 4px 12px rgba(168, 85, 247, 0.15);
+    background: rgba(0, 102, 255, 0.08);
+    box-shadow: 0 4px 12px rgba(0, 102, 255, 0.15);
     transform: translateY(-2px);
 }
 
 .skill-card.frontend-theme .skill-badge:hover {
     border-color: var(--accent);
     color: white;
-    background: rgba(236, 72, 153, 0.08);
-    box-shadow: 0 4px 12px rgba(236, 72, 153, 0.15);
+    background: rgba(0, 240, 255, 0.08);
+    box-shadow: 0 4px 12px rgba(0, 240, 255, 0.15);
     transform: translateY(-2px);
 }
 
@@ -756,8 +756,8 @@ section {
 
 .status-badge.in-progress {
     color: var(--accent);
-    border: 1px solid rgba(236, 72, 153, 0.25);
-    background: rgba(236, 72, 153, 0.06);
+    border: 1px solid rgba(0, 240, 255, 0.25);
+    background: rgba(0, 240, 255, 0.06);
 }
 
 .status-badge.in-progress .status-dot {
@@ -767,8 +767,8 @@ section {
 
 .status-badge.configured {
     color: var(--secondary);
-    border: 1px solid rgba(168, 85, 247, 0.25);
-    background: rgba(168, 85, 247, 0.06);
+    border: 1px solid rgba(0, 102, 255, 0.25);
+    background: rgba(0, 102, 255, 0.06);
 }
 
 .status-badge.configured .status-dot {
@@ -1433,7 +1433,7 @@ footer {
 /* Dynamic Glowing Section Backgrounds */
 #skills {
     background: radial-gradient(circle at 15% 20%, rgba(0, 240, 255, 0.03) 0%, transparent 40%),
-                radial-gradient(circle at 85% 80%, rgba(168, 85, 247, 0.03) 0%, transparent 40%),
+                radial-gradient(circle at 85% 80%, rgba(0, 102, 255, 0.03) 0%, transparent 40%),
                 rgba(9, 13, 22, 0.72);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
@@ -1442,7 +1442,7 @@ footer {
 
 #projects {
     background: radial-gradient(circle at 80% 25%, rgba(0, 240, 255, 0.03) 0%, transparent 45%),
-                radial-gradient(circle at 20% 75%, rgba(168, 85, 247, 0.03) 0%, transparent 45%),
+                radial-gradient(circle at 20% 75%, rgba(0, 102, 255, 0.03) 0%, transparent 45%),
                 rgba(3, 7, 18, 0.8) !important;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
@@ -1450,7 +1450,7 @@ footer {
 }
 
 #about {
-    background: radial-gradient(circle at 50% 30%, rgba(168, 85, 247, 0.02) 0%, transparent 50%),
+    background: radial-gradient(circle at 50% 30%, rgba(0, 102, 255, 0.02) 0%, transparent 50%),
                 radial-gradient(circle at 10% 80%, rgba(0, 240, 255, 0.02) 0%, transparent 40%),
                 rgba(9, 13, 22, 0.72);
     backdrop-filter: blur(12px);

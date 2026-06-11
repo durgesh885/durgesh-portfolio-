@@ -288,7 +288,7 @@ export default function Home() {
     directionalLight1.position.set(5, 10, 7);
     scene.add(directionalLight1);
 
-    const pointLight = new THREE.PointLight(0xa855f7, 2.5, 50);
+    const pointLight = new THREE.PointLight(0x0066ff, 2.5, 50);
     pointLight.position.set(-4, 2, 2);
     scene.add(pointLight);
 
@@ -311,11 +311,11 @@ export default function Home() {
     // 2. Inner Faceted Crystalline Core
     const innerGeometry = new THREE.IcosahedronGeometry(0.65, 0); // flat facets
     const innerMaterial = new THREE.MeshPhongMaterial({
-      color: 0xa855f7,
+      color: 0x0066ff,
       transparent: true,
       opacity: 0.38,
       shininess: 150,
-      emissive: 0x3b0764,
+      emissive: 0x002288,
       flatShading: true
     });
     const innerCore = new THREE.Mesh(innerGeometry, innerMaterial);
@@ -335,7 +335,7 @@ export default function Home() {
 
     const ringGeometry2 = new THREE.TorusGeometry(2.1, 0.015, 8, 64);
     const ringMaterial2 = new THREE.MeshBasicMaterial({
-      color: 0xff007f,
+      color: 0x00ffd2,
       transparent: true,
       opacity: 0.2,
       blending: THREE.AdditiveBlending
@@ -463,12 +463,12 @@ export default function Home() {
       // Float Y offset slightly over time
       coreGroup.position.y = targetGroupPos.y + Math.sin(Date.now() * 0.001) * 0.12;
 
-      // Dynamic color-shifting on the outer and inner core (HSL gradients)
+      // Dynamic color-shifting restricted to cyan-blue spectrum (no red/purple)
       const time = Date.now() * 0.0001;
-      const hueOuter = (time * 0.15) % 1;
+      const hueOuter = 0.5 + Math.sin(time * 0.5) * 0.08; 
       outerMaterial.color.setHSL(hueOuter, 1.0, 0.5); 
       
-      const hueInner = (time * 0.15 + 0.33) % 1;
+      const hueInner = 0.58 + Math.cos(time * 0.5) * 0.08; 
       innerMaterial.color.setHSL(hueInner, 0.85, 0.5); 
       innerMaterial.emissive.setHSL(hueInner, 0.85, 0.2);
 
