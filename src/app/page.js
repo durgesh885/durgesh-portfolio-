@@ -803,22 +803,22 @@ export default function Home() {
             {/* Project 1 */}
             <div className="project-card reveal">
               <div className="project-card-header">
-                <h3 className="project-title">Automated Web Server Hosting on AWS</h3>
+                <h3 className="project-title">AWS EC2 Self-Service Management Dashboard</h3>
                 <span className="status-badge live-on-aws">
                   <span className="status-dot"></span>
                   Live
                 </span>
               </div>
-              <p className="project-desc">Personal portfolio website deployed on AWS EC2 with Apache server configuration, secure SSL certificates setup, and custom domain routing configured through Route 53.</p>
-              <p className="tech-stack-line mono">AWS EC2 · Route 53 · Apache · Linux Admin</p>
+              <p className="project-desc">Developed serverless AWS Lambda functions using Python (Boto3 SDK) to toggle EC2 runtime states, reducing active instance costs. Configured Amazon API Gateway REST endpoints to trigger Lambda functions securely via HTTPS requests from a web interface. Enforced IAM least-privilege security by authoring custom JSON policies for EC2 control, eliminating the use of root access keys. Deployed control panel UI on Vercel, integrating API Gateway endpoints and resolving CORS communication issues.</p>
+              <p className="tech-stack-line mono">AWS EC2 · AWS Lambda · Python (Boto3) · Amazon API Gateway · AWS IAM · Vercel</p>
               <div className="project-card-links">
-                <a href="https://github.com/durgesh885" target="_blank" rel="noopener noreferrer" className="project-card-link">
+                <a href="https://github.com/durgesh885/ec2-control-dashboard" target="_blank" rel="noopener noreferrer" className="project-card-link">
                   <svg className="link-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16">
                     <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
                   </svg>
                   <span>GitHub</span>
                 </a>
-                <a href="#" className="project-card-link" onClick={(e) => e.preventDefault()}>
+                <a href="https://ec2-control-dashboard.vercel.app" target="_blank" rel="noopener noreferrer" className="project-card-link">
                   <ExternalLinkIcon />
                   <span>Live Demo</span>
                 </a>
@@ -828,14 +828,14 @@ export default function Home() {
             {/* Project 2 */}
             <div className="project-card reveal">
               <div className="project-card-header">
-                <h3 className="project-title">Real-time Cloud Chat System</h3>
-                <span className="status-badge in-progress">
+                <h3 className="project-title">Dockerized App Deployment on AWS EC2</h3>
+                <span className="status-badge configured">
                   <span className="status-dot"></span>
-                  In Dev
+                  Configured
                 </span>
               </div>
-              <p className="project-desc">Full-stack chat application designed using React, Tailwind CSS, Node.js and Express. Features instant, real-time messaging with Socket.io web sockets.</p>
-              <p className="tech-stack-line mono">React · Tailwind CSS · Node.js · Express</p>
+              <p className="project-desc">Provisioned Ubuntu virtual instances on AWS EC2, configuring Security Groups to restrict inbound network access to ports 80, 443, and 22. Authored multi-stage Dockerfiles to containerize application layers, reducing production image footprint by copying only compiled static assets. Orchestrated multi-container runtimes using Docker Compose, managing port mappings, persistent volume mounts, and secure environment variable injections. Configured Nginx as a reverse proxy inside the VM to securely route client traffic to internal container ports.</p>
+              <p className="tech-stack-line mono">Docker · Docker Compose · AWS EC2 · Nginx · Ubuntu Linux</p>
               <div className="project-card-links">
                 <a href="https://github.com/durgesh885" target="_blank" rel="noopener noreferrer" className="project-card-link">
                   <svg className="link-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16">
@@ -843,9 +843,9 @@ export default function Home() {
                   </svg>
                   <span>GitHub</span>
                 </a>
-                <a href="https://github.com/durgesh885" target="_blank" rel="noopener noreferrer" className="project-card-link">
+                <a href="#" className="project-card-link" onClick={(e) => e.preventDefault()}>
                   <ExternalLinkIcon />
-                  <span>View Code</span>
+                  <span>Configured</span>
                 </a>
               </div>
             </div>
@@ -853,14 +853,14 @@ export default function Home() {
             {/* Project 3 */}
             <div className="project-card reveal">
               <div className="project-card-header">
-                <h3 className="project-title">AWS DevOps & Linux Server Admin</h3>
+                <h3 className="project-title">Multi-Domain Web Server Hosting on AWS EC2</h3>
                 <span className="status-badge configured">
                   <span className="status-dot"></span>
                   Configured
                 </span>
               </div>
-              <p className="project-desc">Configured Apache proxy servers on EC2, managed custom security groups, VPC virtual networking parameters, SSH keys administration, and secure Linux server administration.</p>
-              <p className="tech-stack-line mono">Apache · AWS EC2 · Linux · VPC</p>
+              <p className="project-desc">Deployed and configured Apache (httpd) services on Linux EC2 instances to host multiple web profiles using Virtual Hosts. Managed systemd services, directory overrides, and restricted system files using standard Linux permissions. Administered DNS records within AWS Route 53 hosted zones, mapping public domains to EC2 public IPs using A-records. Secured client-to-server traffic by automating SSL/TLS certificate installation and renewal via Certbot.</p>
+              <p className="tech-stack-line mono">Apache (httpd) · AWS EC2 · AWS Route 53 · Let's Encrypt · Linux</p>
               <div className="project-card-links">
                 <a href="https://github.com/durgesh885" target="_blank" rel="noopener noreferrer" className="project-card-link">
                   <svg className="link-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16">
@@ -870,7 +870,7 @@ export default function Home() {
                 </a>
                 <a href="#" className="project-card-link" onClick={(e) => e.preventDefault()}>
                   <ExternalLinkIcon />
-                  <span>Details</span>
+                  <span>Configured</span>
                 </a>
               </div>
             </div>
@@ -878,14 +878,14 @@ export default function Home() {
             {/* Project 4 */}
             <div className="project-card reveal">
               <div className="project-card-header">
-                <h3 className="project-title">Cloud-Native MERN Stack App</h3>
-                <span className="status-badge building">
+                <h3 className="project-title">High-Availability Static Web Hosting on AWS S3</h3>
+                <span className="status-badge configured">
                   <span className="status-dot"></span>
-                  Building
+                  Configured
                 </span>
               </div>
-              <p className="project-desc">Full-fledged cloud application utilising MongoDB, Express, React, and Node.js with a primary focus on database cluster synchronization and replica sets routing.</p>
-              <p className="tech-stack-line mono">MongoDB · Express · React · Node.js</p>
+              <p className="project-desc">Hosted static web assets directly on AWS S3 buckets optimized for public website hosting endpoints to minimize infrastructure maintenance overhead. Authored JSON S3 bucket policies to grant secure, read-only public access to assets while protecting bucket administrative privileges. Configured Cross-Origin Resource Sharing (CORS) rules to enable secure, verified API communication with external domains.</p>
+              <p className="tech-stack-line mono">AWS S3 · AWS IAM · CORS Configuration</p>
               <div className="project-card-links">
                 <a href="https://github.com/durgesh885" target="_blank" rel="noopener noreferrer" className="project-card-link">
                   <svg className="link-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16">
@@ -895,7 +895,7 @@ export default function Home() {
                 </a>
                 <a href="#" className="project-card-link" onClick={(e) => e.preventDefault()}>
                   <ExternalLinkIcon />
-                  <span>In Dev</span>
+                  <span>Configured</span>
                 </a>
               </div>
             </div>
