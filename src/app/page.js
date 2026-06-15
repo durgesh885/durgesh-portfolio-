@@ -104,7 +104,8 @@ export default function Home() {
 
   // Set mount safety
   useEffect(() => {
-    setMounted(true);
+    const frameId = requestAnimationFrame(() => setMounted(true));
+    return () => cancelAnimationFrame(frameId);
   }, []);
 
   // Dynamic Loader Progress Loop
@@ -138,10 +139,10 @@ export default function Home() {
     if (!mounted) return;
 
     const roles = [
-      'AWS Cloud Specialist',
-      'DevOps Engineer',
-      'MCA Software Engineer',
-      'Infrastructure Builder'
+      'Cloud Engineer',
+      'DevOps Learner',
+      'AWS Practitioner',
+      'Problem Solver'
     ];
     let roleIndex = 0;
     let charIndex = 0;
@@ -235,118 +236,203 @@ export default function Home() {
     return () => reveals.forEach((el) => observer.unobserve(el));
   }, [mounted, loaderHidden]);
 
-  // Three.js 3D Holographic Torus Knot (Dancing Spiral/Design Sphere) simulation
+  // Lock body scroll when mobile menu is open to prevent scroll leaks on mobile
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.classList.add("menu-open");
+    } else {
+      document.body.classList.remove("menu-open");
+    }
+    return () => {
+      document.body.classList.remove("menu-open");
+    };
+  }, [mobileMenuOpen]);
+
+  // Three.js CloudOps infrastructure scene
   useEffect(() => {
     if (!mounted || !canvasContainerRef.current) return;
 
+    const canvasContainer = canvasContainerRef.current;
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    const testCanvas = document.createElement("canvas");
+    const hasWebGL = testCanvas.getContext("webgl2") || testCanvas.getContext("webgl");
+    let renderer;
+
+    if (!hasWebGL) return;
+
+    try {
+      renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    } catch {
+      return;
+    }
 
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(window.devicePixelRatio);
-    canvasContainerRef.current.appendChild(renderer.domElement);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.8));
+    canvasContainer.appendChild(renderer.domElement);
+    canvasContainer.classList.add("webgl-active");
 
-    // Lights
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.95);
+    const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+
+    // Lights (optimized/dimmed on mobile to improve content readability)
+    const ambientLight = new THREE.AmbientLight(0xffffff, isMobile ? 0.35 : 0.72);
     scene.add(ambientLight);
 
-    const directionalLight1 = new THREE.DirectionalLight(0x00f0ff, 2.0);
-    directionalLight1.position.set(5, 10, 7);
+    const directionalLight1 = new THREE.DirectionalLight(0x00f0ff, isMobile ? 0.8 : 1.8);
+    directionalLight1.position.set(5, 7, 6);
     scene.add(directionalLight1);
 
-    const pointLight = new THREE.PointLight(0x0055ff, 3.5, 50); // Neon Blue
-    pointLight.position.set(-4, 2, 2);
+    const pointLight = new THREE.PointLight(0x0055ff, isMobile ? 1.5 : 3.2, 48);
+    pointLight.position.set(-3.5, 2.5, 2);
     scene.add(pointLight);
 
-    const pointLight2 = new THREE.PointLight(0x00f0ff, 2.5, 30); // Neon Cyan
-    pointLight2.position.set(4, -2, 2);
+    const pointLight2 = new THREE.PointLight(0x00ffd2, isMobile ? 1.0 : 2.2, 34);
+    pointLight2.position.set(4, -1.5, 3);
     scene.add(pointLight2);
-
-    // Main Torus Group
-    const torusGroup = new THREE.Group();
-    scene.add(torusGroup);
 
     const geometriesToDispose = [];
     const materialsToDispose = [];
 
-    // 1. Dual-Layer Torus Knot Core
-    // Layer A: Outer Neon Cyan Wireframe
-    const torusGeometry = new THREE.TorusKnotGeometry(1.2, 0.32, 150, 16);
-    geometriesToDispose.push(torusGeometry);
+    const infraGroup = new THREE.Group();
+    scene.add(infraGroup);
 
-    const torusMaterial = new THREE.MeshPhongMaterial({
+    // Inner Core (Representing AWS database/gateway)
+    const coreGeometry = new THREE.IcosahedronGeometry(0.55, 1);
+    geometriesToDispose.push(coreGeometry);
+    const coreMaterial = new THREE.MeshBasicMaterial({
       color: 0x00f0ff,
       wireframe: true,
       transparent: true,
-      opacity: 0.35, // Slightly more visible
-      shininess: 120,
-      specular: 0x00f0ff
+      opacity: isMobile ? 0.45 : 0.65,
+      blending: THREE.AdditiveBlending
     });
-    materialsToDispose.push(torusMaterial);
+    materialsToDispose.push(coreMaterial);
+    const coreMesh = new THREE.Mesh(coreGeometry, coreMaterial);
+    infraGroup.add(coreMesh);
 
-    const torusKnotMesh = new THREE.Mesh(torusGeometry, torusMaterial);
-    torusGroup.add(torusKnotMesh);
-
-    // Layer B: Inner Solid Low-Poly Glow-Blue Core
-    const torusInnerGeometry = new THREE.TorusKnotGeometry(1.14, 0.26, 80, 10);
-    geometriesToDispose.push(torusInnerGeometry);
-
-    const torusInnerMaterial = new THREE.MeshPhongMaterial({
-      color: 0x0066ff, // Pure Blue
+    // Middle Globe (Representing global network routing wireframe)
+    const globeGeometry = new THREE.SphereGeometry(1.5, 15, 15);
+    geometriesToDispose.push(globeGeometry);
+    const globeMaterial = new THREE.MeshBasicMaterial({
+      color: 0x0066ff,
+      wireframe: true,
       transparent: true,
-      opacity: 0.22, // Slightly more solid glow
-      shininess: 100,
-      specular: 0x00f0ff,
-      flatShading: true
+      opacity: isMobile ? 0.22 : 0.35,
+      blending: THREE.AdditiveBlending
     });
-    materialsToDispose.push(torusInnerMaterial);
+    materialsToDispose.push(globeMaterial);
+    const globeMesh = new THREE.Mesh(globeGeometry, globeMaterial);
+    infraGroup.add(globeMesh);
 
-    const torusInnerMesh = new THREE.Mesh(torusInnerGeometry, torusInnerMaterial);
-    torusGroup.add(torusInnerMesh);
+    // Outer Orbiting Data Ring
+    const ringGroup = new THREE.Group();
+    ringGroup.rotation.x = 0.55; // Tilt ring for 3D perspective
+    ringGroup.rotation.z = 0.2;
+    infraGroup.add(ringGroup);
 
-    // 3. Cyber Ground Perspective Grid (Scrolling Server Floor)
-    const gridHelper = new THREE.GridHelper(60, 48, 0x00f0ff, 0x090d16);
+    const particleCount = isMobile ? 24 : 48;
+    const ringPositions = new Float32Array(particleCount * 3);
+    const linePositions = new Float32Array(particleCount * 2 * 3); // Radial spokes to center
+    const radius = 2.45;
+
+    for (let i = 0; i < particleCount; i++) {
+      const angle = (i / particleCount) * Math.PI * 2;
+      const px = Math.cos(angle) * radius;
+      const pz = Math.sin(angle) * radius;
+
+      ringPositions[i * 3] = px;
+      ringPositions[i * 3 + 1] = 0;
+      ringPositions[i * 3 + 2] = pz;
+
+      // Outer ring particle endpoint
+      linePositions[i * 6] = px;
+      linePositions[i * 6 + 1] = 0;
+      linePositions[i * 6 + 2] = pz;
+
+      // Center core endpoint
+      linePositions[i * 6 + 3] = 0;
+      linePositions[i * 6 + 4] = 0;
+      linePositions[i * 6 + 5] = 0;
+    }
+
+    const ringGeometry = new THREE.BufferGeometry();
+    ringGeometry.setAttribute('position', new THREE.BufferAttribute(ringPositions, 3));
+    geometriesToDispose.push(ringGeometry);
+
+    // Canvas texture to make points circular & glowing
+    const createCircleTexture = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = 16;
+      canvas.height = 16;
+      const ctx = canvas.getContext('2d');
+      const grad = ctx.createRadialGradient(8, 8, 0, 8, 8, 8);
+      grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
+      grad.addColorStop(0.3, 'rgba(0, 240, 255, 0.8)');
+      grad.addColorStop(1, 'rgba(0, 240, 255, 0)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 16, 16);
+      return new THREE.CanvasTexture(canvas);
+    };
+
+    const pointTexture = createCircleTexture();
+    materialsToDispose.push(pointTexture);
+
+    const ringMaterial = new THREE.PointsMaterial({
+      size: isMobile ? 0.16 : 0.22,
+      map: pointTexture,
+      transparent: true,
+      opacity: isMobile ? 0.65 : 0.85,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
+    });
+    materialsToDispose.push(ringMaterial);
+
+    const ringPoints = new THREE.Points(ringGeometry, ringMaterial);
+    ringGroup.add(ringPoints);
+
+    // Spokes geometry
+    const lineGeometry = new THREE.BufferGeometry();
+    lineGeometry.setAttribute('position', new THREE.BufferAttribute(linePositions, 3));
+    geometriesToDispose.push(lineGeometry);
+
+    const lineMaterial = new THREE.LineBasicMaterial({
+      color: 0x00ffd2,
+      transparent: true,
+      opacity: isMobile ? 0.16 : 0.28,
+      blending: THREE.AdditiveBlending
+    });
+    materialsToDispose.push(lineMaterial);
+
+    const lineMesh = new THREE.LineSegments(lineGeometry, lineMaterial);
+    ringGroup.add(lineMesh);
+
+    const gridHelper = new THREE.GridHelper(48, 42, 0x00f0ff, 0x090d16);
     gridHelper.position.y = -3.8;
     gridHelper.position.z = -2;
-    gridHelper.material.opacity = 0.07;
+    gridHelper.material.opacity = 0.14;
     gridHelper.material.transparent = true;
     scene.add(gridHelper);
 
-    // 4. Orbiting Data Packet Particle Vortex
     const particlesGeometry = new THREE.BufferGeometry();
-    const particlesCount = 240;
+    const particlesCount = 170;
     const positions = new Float32Array(particlesCount * 3);
-    const particleSpeeds = [];
-    const particleAngles = [];
-    const particleRadii = [];
-    const particleOscillations = [];
+    const particleDrift = [];
 
     for (let i = 0; i < particlesCount; i++) {
-      const radius = 1.8 + Math.random() * 6.5;
-      const angle = Math.random() * Math.PI * 2;
-      const speed = 0.002 + Math.random() * 0.005;
-      const height = (Math.random() - 0.5) * 3.5;
-      const oscSpeed = 0.001 + Math.random() * 0.003;
-
-      particleRadii.push(radius);
-      particleAngles.push(angle);
-      particleSpeeds.push(speed);
-      particleOscillations.push({ speed: oscSpeed, current: Math.random() * 100, amp: 0.1 + Math.random() * 0.2 });
-
-      positions[i * 3] = Math.cos(angle) * radius;
-      positions[i * 3 + 1] = height;
-      positions[i * 3 + 2] = Math.sin(angle) * radius;
+      positions[i * 3] = (Math.random() - 0.5) * 9;
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 4.5;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 5;
+      particleDrift.push(0.001 + Math.random() * 0.0025);
     }
 
     particlesGeometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
     geometriesToDispose.push(particlesGeometry);
 
     const particlesMaterial = new THREE.PointsMaterial({
-      size: 0.045,
-      color: 0x00f0ff, // Cyan-blue particles
+      size: 0.04,
+      color: 0x00ffd2,
       transparent: true,
-      opacity: 0.55,
+      opacity: 0.42,
       blending: THREE.AdditiveBlending
     });
     materialsToDispose.push(particlesMaterial);
@@ -377,17 +463,20 @@ export default function Home() {
 
     const checkModelVisibility = () => {
       if (window.innerWidth < 968) {
-        targetGroupPos.set(0, 1.2, -3.0);
-        torusGroup.scale.set(0.75, 0.75, 0.75);
+        targetGroupPos.set(0, 1.15, -3.15);
+        infraGroup.scale.set(0.68, 0.68, 0.68);
       } else {
-        targetGroupPos.set(4.4, 0.3, -1.5); // Move further right on desktop
-        torusGroup.scale.set(1.1, 1.1, 1.1);
+        targetGroupPos.set(4.25, 0.25, -1.35);
+        infraGroup.scale.set(1.08, 1.08, 1.08);
       }
-      torusGroup.position.copy(targetGroupPos);
+      infraGroup.position.copy(targetGroupPos);
     };
     checkModelVisibility();
 
+    let lastWidth = window.innerWidth;
     const handleResize = () => {
+      if (window.innerWidth === lastWidth) return; // Prevent WebGL context resize on vertical scroll height changes (address bar toggle)
+      lastWidth = window.innerWidth;
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
@@ -408,51 +497,44 @@ export default function Home() {
       camera.position.x += (targetX - camera.position.x) * 0.04;
       camera.position.y += (-targetY - camera.position.y) * 0.04;
       
-      camera.lookAt(targetGroupPos.x - (window.innerWidth < 968 ? 0 : 2.5), targetGroupPos.y, targetGroupPos.z);
+      camera.lookAt(targetGroupPos.x - (window.innerWidth < 968 ? 0 : 2.4), targetGroupPos.y, targetGroupPos.z);
 
       // Scroll interpolation
       const currentScroll = scrollRef.current;
       targetScrollY += (currentScroll - targetScrollY) * 0.05;
       const scrollFactor = targetScrollY * 0.0006;
 
-      // Rotate and float the Torus group based on scroll factor and time
-      torusGroup.position.y = targetGroupPos.y + Math.sin(Date.now() * 0.001) * 0.15 - (scrollFactor * 0.2);
-      torusGroup.rotation.y = scrollFactor * 0.15 + Date.now() * 0.0002;
-      torusGroup.rotation.x = Math.sin(Date.now() * 0.0005) * 0.1;
+      const time = Date.now() * 0.001;
+      // Rotate Cyber-Core components
+      globeMesh.rotation.y += 0.0018;
+      globeMesh.rotation.x += 0.0008;
 
-      // Spin internal mesh elements and orbital rings
-      torusKnotMesh.rotation.y += 0.003;
-      torusKnotMesh.rotation.x += 0.001;
-      torusInnerMesh.rotation.y -= 0.002;
-      torusInnerMesh.rotation.z += 0.001;
+      ringGroup.rotation.y += 0.0045;
 
-      // Surrounding rings removed
+      coreMesh.rotation.y -= 0.003;
+      coreMesh.rotation.x -= 0.001;
+
+      // Layout positioning
+      infraGroup.position.y = targetGroupPos.y + Math.sin(time) * 0.1 - (scrollFactor * 0.18);
+      infraGroup.rotation.y = Math.sin(time * 0.35) * 0.16 + scrollFactor * 0.12;
+      infraGroup.rotation.x = Math.sin(time * 0.25) * 0.04;
 
       // Infinite scrolling grid (illusion of movement)
-      gridHelper.position.z += 0.015;
-      // Grid cells repeat every 60 / 48 = 1.25 units
-      if (gridHelper.position.z >= 1.25) {
+      gridHelper.position.z += 0.012;
+      if (gridHelper.position.z >= 1.15) {
         gridHelper.position.z = 0;
       }
       gridHelper.rotation.y = mouseX * 0.05;
 
-      // Update Orbiting Data Particles positions
       const positionsArr = particlesGeometry.attributes.position.array;
       for (let i = 0; i < particlesCount; i++) {
-        particleAngles[i] += particleSpeeds[i];
-        
-        // Add smooth wave oscillation to make it look organic
-        particleOscillations[i].current += particleOscillations[i].speed;
-        const wave = Math.sin(particleOscillations[i].current) * particleOscillations[i].amp;
-
-        positionsArr[i * 3] = Math.cos(particleAngles[i]) * particleRadii[i];
-        positionsArr[i * 3 + 1] += wave * 0.02; // slight hover movement
-        positionsArr[i * 3 + 2] = Math.sin(particleAngles[i]) * particleRadii[i];
+        positionsArr[i * 3 + 1] += particleDrift[i];
+        if (positionsArr[i * 3 + 1] > 2.4) {
+          positionsArr[i * 3 + 1] = -2.3;
+        }
       }
       particlesGeometry.attributes.position.needsUpdate = true;
-
-      // Slowly rotate the particle system system-wide
-      dataParticles.rotation.y += 0.0001;
+      dataParticles.rotation.y += 0.0002;
 
       renderer.render(scene, camera);
     };
@@ -468,14 +550,16 @@ export default function Home() {
       geometriesToDispose.forEach((g) => g.dispose());
       materialsToDispose.forEach((m) => m.dispose());
 
-      gridHelper.dispose();
+      gridHelper.geometry.dispose();
+      gridHelper.material.dispose();
       scene.remove(dataParticles);
       scene.remove(gridHelper);
-      scene.remove(torusGroup);
+      scene.remove(infraGroup);
 
-      if (canvasContainerRef.current && renderer.domElement) {
-        canvasContainerRef.current.removeChild(renderer.domElement);
+      if (renderer.domElement.parentNode === canvasContainer) {
+        canvasContainer.removeChild(renderer.domElement);
       }
+      canvasContainer.classList.remove("webgl-active");
       renderer.dispose();
     };
   }, [mounted]);
@@ -663,8 +747,8 @@ export default function Home() {
         <div className="hero-content">
           <div className="hero-text">
             <div className="hero-badge mono">☁️ DevOps & AWS Cloud</div>
-            <h1>Hi, I'm<br />Durgesh 🚀</h1>
-            <div className="hero-role mono" id="typeText">{typeText || "DevOps Engineer"}</div>
+            <h1>Hi, I&apos;m<br />Durgesh 🚀</h1>
+            <div className="hero-role mono" id="typeText">{typeText}</div>
             <p className="hero-desc">
               Aspiring <strong>DevOps & AWS Cloud Engineer</strong> specializing in cloud architecture design, server deployment, and automated <strong>CI/CD pipelines</strong>. I design scalable virtual infrastructure and build full-stack web applications.
             </p>
@@ -703,13 +787,13 @@ export default function Home() {
             
             <div className="code-body">
               <div className="code-row"><span className="line-num">1</span><span className="code-line"><span className="keyword">const</span> <span className="var">engineer</span> = &#123;</span></div>
-              <div className="code-row"><span className="line-num">2</span><span className="code-line">&nbsp;&nbsp;<span className="key">name</span>: <span className="string">'Durgesh Chaudhari'</span>,</span></div>
-              <div className="code-row"><span className="line-num">3</span><span className="code-line">&nbsp;&nbsp;<span className="key">role</span>: <span className="string">'Cloud & DevOps Engineer'</span>,</span></div>
-              <div className="code-row"><span className="line-num">4</span><span className="code-line">&nbsp;&nbsp;<span className="key">stack</span>: [<span className="string">'MongoDB'</span>, <span className="string">'Express'</span>,</span></div>
-              <div className="code-row"><span className="line-num">5</span><span className="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="string">'React'</span>, <span style={{ color: "#ff79c6" }}>'Node.js'</span>],</span></div>
-              <div className="code-row"><span className="line-num">6</span><span className="code-line">&nbsp;&nbsp;<span className="key">cloud</span>: [<span className="string">'AWS EC2'</span>, <span className="string">'S3'</span>, <span className="string">'Route53'</span>, <span className="string">'VPC'</span>],</span></div>
-              <div className="code-row"><span className="line-num">7</span><span className="code-line">&nbsp;&nbsp;<span className="key">devops</span>: [<span className="string">'CI/CD'</span>, <span className="string">'Linux Admin'</span>, <span className="string">'Apache'</span>],</span></div>
-              <div className="code-row"><span className="line-num">8</span><span className="code-line">&nbsp;&nbsp;<span className="key">status</span>: <span className="string">'Nominal / Ready to Deploy'</span></span></div>
+              <div className="code-row"><span className="line-num">2</span><span className="code-line">&nbsp;&nbsp;<span className="key">name</span>: <span className="string">&apos;Durgesh Chaudhari&apos;</span>,</span></div>
+              <div className="code-row"><span className="line-num">3</span><span className="code-line">&nbsp;&nbsp;<span className="key">role</span>: <span className="string">&apos;Cloud & DevOps Engineer&apos;</span>,</span></div>
+              <div className="code-row"><span className="line-num">4</span><span className="code-line">&nbsp;&nbsp;<span className="key">stack</span>: [<span className="string">&apos;MongoDB&apos;</span>, <span className="string">&apos;Express&apos;</span>,</span></div>
+              <div className="code-row"><span className="line-num">5</span><span className="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="string">&apos;React&apos;</span>, <span style={{ color: "#ff79c6" }}>&apos;Node.js&apos;</span>],</span></div>
+              <div className="code-row"><span className="line-num">6</span><span className="code-line">&nbsp;&nbsp;<span className="key">cloud</span>: [<span className="string">&apos;AWS EC2&apos;</span>, <span className="string">&apos;S3&apos;</span>, <span className="string">&apos;Route53&apos;</span>, <span className="string">&apos;VPC&apos;</span>],</span></div>
+              <div className="code-row"><span className="line-num">7</span><span className="code-line">&nbsp;&nbsp;<span className="key">devops</span>: [<span className="string">&apos;CI/CD&apos;</span>, <span className="string">&apos;Linux Admin&apos;</span>, <span className="string">&apos;Apache&apos;</span>],</span></div>
+              <div className="code-row"><span className="line-num">8</span><span className="code-line">&nbsp;&nbsp;<span className="key">status</span>: <span className="string">&apos;Nominal / Ready to Deploy&apos;</span></span></div>
               <div className="code-row"><span className="line-num">9</span><span className="code-line">&#125;;</span></div>
             </div>
           </div>
@@ -860,7 +944,7 @@ export default function Home() {
                 </span>
               </div>
               <p className="project-desc">Deployed and configured Apache (httpd) services on Linux EC2 instances to host multiple web profiles using Virtual Hosts. Managed systemd services, directory overrides, and restricted system files using standard Linux permissions. Administered DNS records within AWS Route 53 hosted zones, mapping public domains to EC2 public IPs using A-records. Secured client-to-server traffic by automating SSL/TLS certificate installation and renewal via Certbot.</p>
-              <p className="tech-stack-line mono">Apache (httpd) · AWS EC2 · AWS Route 53 · Let's Encrypt · Linux</p>
+              <p className="tech-stack-line mono">Apache (httpd) · AWS EC2 · AWS Route 53 · Let&apos;s Encrypt · Linux</p>
               <div className="project-card-links">
                 <a href="https://github.com/durgesh885" target="_blank" rel="noopener noreferrer" className="project-card-link">
                   <svg className="link-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16">
@@ -919,10 +1003,10 @@ export default function Home() {
                 I am <strong>Durgesh Chaudhari</strong>, currently pursuing my <strong>Master of Computer Applications (MCA)</strong>. I am passionate about Cloud Architectures, automated deployments, Linux systems, and DevOps engineering.
               </p>
               <p className="about-text">
-                My software journey began with standard web development. As I built and integrated backend APIs, I became intrigued by *where* and *how* code runs. This led me straight into <strong>AWS Cloud Computing</strong> and the principles of <strong>DevOps automation</strong>.
+                My software journey began with standard web development. As I built and integrated backend APIs, I became intrigued by <em>where</em> and <em>how</em> code runs. This led me straight into <strong>AWS Cloud Computing</strong> and the principles of <strong>DevOps automation</strong>.
               </p>
               <p className="about-text">
-                I believe in **Infrastructure as Code** and hands-on system building. Deploying portfolio items, configuring SSL certificates, managing DNS entries on Route53, and configuring web server proxies are steps towards my goal of architecting highly available systems.
+                I believe in <strong>Infrastructure as Code</strong> and hands-on system building. Deploying portfolio items, configuring SSL certificates, managing DNS entries on Route53, and configuring web server proxies are steps towards my goal of architecting highly available systems.
               </p>
               
               <div className="education-timeline">
@@ -967,7 +1051,7 @@ export default function Home() {
         <div className="container">
           <div className="section-header reveal">
             <span className="section-tag">Get In Touch</span>
-            <h2 className="section-title">Let's Connect</h2>
+            <h2 className="section-title">Let&apos;s Connect</h2>
             <p className="section-subtitle">Open for Cloud & DevOps internships, collaborative projects, and engineering conversations</p>
           </div>
           
