@@ -932,8 +932,8 @@ export default function Home() {
     const windowHalfY = window.innerHeight / 2;
 
     const handleMouseMove = (event) => {
-      mouseX = (event.clientX - windowHalfX) / 250;
-      mouseY = (event.clientY - windowHalfY) / 250;
+      mouseX = (event.clientX - windowHalfX) / windowHalfX; // Normalized [-1, 1]
+      mouseY = (event.clientY - windowHalfY) / windowHalfY; // Normalized [-1, 1]
     };
 
     document.addEventListener("mousemove", handleMouseMove);
@@ -1022,13 +1022,13 @@ export default function Home() {
       // Slow, majestic floating up and down (decreased speed, increased amplitude)
       infraGroup.position.y = targetGroupPos.y + Math.sin(time * 0.35) * 0.08 - (scrollFactor * 0.15);
       
-      // Sweeping back-and-forth idle rotation to show 3D details without showing raw backs
-      const idleRotationY = Math.sin(time * 0.22) * 0.12; // Sweeps +/- 7 degrees slowly
-      const idleRotationX = Math.cos(time * 0.22) * 0.03; // Sweeps +/- 1.7 degrees slowly
+      // Sweeping back-and-forth idle rotation to show 3D details smoothly (sweeps +/- 25 degrees)
+      const idleRotationY = Math.sin(time * 0.2) * 0.45; 
+      const idleRotationX = Math.cos(time * 0.2) * 0.05; 
       
-      // Limit mouse influence to a tight parallax tilt to prevent exposing flat profiles
-      const targetRotationY = 0.45 + idleRotationY + mouseX * 0.14 + (scrollFactor * 0.08);
-      const targetRotationX = 0.1 + idleRotationX - mouseY * 0.08;
+      // Tight mouse parallax limits (since mouseX/Y are normalized between -1 and 1)
+      const targetRotationY = 0 + idleRotationY + mouseX * 0.15 + (scrollFactor * 0.08);
+      const targetRotationX = 0 + idleRotationX - mouseY * 0.08;
       
       // Smooth interpolation for rotational responsiveness
       infraGroup.rotation.y += (targetRotationY - infraGroup.rotation.y) * 0.08;
