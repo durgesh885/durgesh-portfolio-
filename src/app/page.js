@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import Spline from '@splinetool/react-spline';
+import * as THREE from "three";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 
 // Inline SVG Developer Icons Components
 const CodeIcon = () => (
@@ -92,7 +93,7 @@ export default function Home() {
   const [typeText, setTypeText] = useState("");
 
   // Refs for Three.js Canvas mounting
-  
+  const canvasContainerRef = useRef(null);
   const scrollRef = useRef(0);
 
   // Dynamic Loader Progress State
@@ -248,6 +249,265 @@ export default function Home() {
     };
   }, [mobileMenuOpen]);
 
+  // Three.js CloudOps infrastructure scene
+  useEffect(() => {
+    if (!mounted || !canvasContainerRef.current) return;
+
+    const canvasContainer = canvasContainerRef.current;
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const testCanvas = document.createElement("canvas");
+    const hasWebGL = testCanvas.getContext("webgl2") || testCanvas.getContext("webgl");
+    let renderer;
+
+    if (!hasWebGL) return;
+
+    try {
+      renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    } catch {
+      return;
+    }
+
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(isMobile ? 1.0 : Math.min(window.devicePixelRatio, 1.8)); // Buttery smooth mobile performance
+    canvasContainer.appendChild(renderer.domElement);
+    canvasContainer.classList.add("webgl-active");
+
+    // Lights Setup (Optimized for realistic glassmorphism and solid metal shading)
+    const ambientLight = new THREE.AmbientLight(0xffffff, isMobile ? 0.65 : 0.85);
+    scene.add(ambientLight);
+
+    const dirLight = new THREE.DirectionalLight(0xffffff, isMobile ? 1.0 : 2.0);
+    dirLight.position.set(6, 8, 5);
+    scene.add(dirLight);
+
+    const pointLight1 = new THREE.PointLight(0xff007f, isMobile ? 2.5 : 5.0, 18); // Glowing Magenta
+    pointLight1.position.set(-4, 3.5, 3);
+    scene.add(pointLight1);
+
+    const pointLight2 = new THREE.PointLight(0x00f0ff, isMobile ? 2.5 : 5.0, 18); // Electric Cyan
+    pointLight2.position.set(4, -3.5, 3);
+    scene.add(pointLight2);
+
+    const cursorLight = new THREE.PointLight(0xffaa00, isMobile ? 1.2 : 3.5, 14); // Dynamic Gold Light
+    cursorLight.position.set(0, 0, 4);
+    scene.add(cursorLight);
+
+    const geometriesToDispose = [];
+    const materialsToDispose = [];
+
+    const infraGroup = new THREE.Group();
+    scene.add(infraGroup);
+
+    
+    let mixer;
+    const clock = new THREE.Clock();
+    
+    // Load Actual Heavy-Duty 3D Model (Quantum Server / Cloud Node)
+    const loader = new GLTFLoader();
+    loader.load('/quantum_server.glb', (gltf) => {
+      const model = gltf.scene;
+      
+      // Enhance model materials for realistic look
+      model.traverse((child) => {
+        if (child.isMesh) {
+          child.castShadow = true;
+          child.receiveShadow = true;
+          if (child.material) {
+            child.material.metalness = Math.max(0.7, child.material.metalness || 0);
+            child.material.roughness = Math.min(0.3, child.material.roughness || 1);
+          }
+        }
+      });
+      
+      model.scale.set(0.65, 0.65, 0.65);
+      model.position.set(0, -0.2, 0);
+      
+      infraGroup.add(model);
+      
+      if (gltf.animations && gltf.animations.length) {
+        mixer = new THREE.AnimationMixer(model);
+        gltf.animations.forEach((clip) => {
+          mixer.clipAction(clip).play();
+        });
+      }
+    });
+
+    // 5. Nebula Ambient Dust Particles
+    const particlesGeometry = new THREE.BufferGeometry();
+    const particlesCount = isMobile ? 30 : 75;
+    const positions = new Float32Array(particlesCount * 3);
+    const colors = new Float32Array(particlesCount * 3);
+    const particleDrift = [];
+
+    const starColors = [
+      new THREE.Color(0x00f0ff),
+      new THREE.Color(0xff007f),
+      new THREE.Color(0x00ffd2)
+    ];
+
+    for (let i = 0; i < particlesCount; i++) {
+      positions[i * 3] = (Math.random() - 0.5) * 11;
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 6;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 6;
+      particleDrift.push(0.0008 + Math.random() * 0.0012);
+
+      const color = starColors[Math.floor(Math.random() * starColors.length)];
+      colors[i * 3] = color.r;
+      colors[i * 3 + 1] = color.g;
+      colors[i * 3 + 2] = color.b;
+    }
+
+    particlesGeometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    particlesGeometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+    geometriesToDispose.push(particlesGeometry);
+
+    const particlesMaterial = new THREE.PointsMaterial({
+      size: isMobile ? 0.065 : 0.08,
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.32,
+      blending: THREE.AdditiveBlending
+    });
+    materialsToDispose.push(particlesMaterial);
+
+    const dataParticles = new THREE.Points(particlesGeometry, particlesMaterial);
+    scene.add(dataParticles);
+
+    camera.position.z = 7;
+
+    // Mouse movement variables
+    let mouseX = 0;
+    let mouseY = 0;
+    let targetX = 0;
+    let targetY = 0;
+
+    const windowHalfX = window.innerWidth / 2;
+    const windowHalfY = window.innerHeight / 2;
+
+    const handleMouseMove = (event) => {
+      mouseX = (event.clientX - windowHalfX) / 250;
+      mouseY = (event.clientY - windowHalfY) / 250;
+    };
+
+    document.addEventListener("mousemove", handleMouseMove);
+
+    // Target positions in 3D space (Desktop vs Mobile)
+    const targetGroupPos = new THREE.Vector3();
+
+    const checkModelVisibility = () => {
+      if (window.innerWidth < 968) {
+        // Shifted further down and scaled down on mobile to clear text layout space
+        targetGroupPos.set(0, -2.1, -2.8); 
+        infraGroup.scale.set(0.68, 0.68, 0.68);
+      } else {
+        targetGroupPos.set(4.0, 0.2, -1.2);
+        infraGroup.scale.set(1.28, 1.28, 1.28);
+      }
+      infraGroup.position.copy(targetGroupPos);
+    };
+    checkModelVisibility();
+
+    let lastWidth = window.innerWidth;
+    const handleResize = () => {
+      if (window.innerWidth === lastWidth) return; // Prevent WebGL context resize on vertical scroll height changes (address bar toggle)
+      lastWidth = window.innerWidth;
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      checkModelVisibility();
+    };
+    window.addEventListener("resize", handleResize);
+
+    // Render loop
+    let animationFrameId;
+    let targetScrollY = 0;
+    let canvasOffset = 0;
+
+    const animate = () => {
+      animationFrameId = requestAnimationFrame(animate);
+
+      // Smooth camera interpolation based on mouse (parallax)
+      targetX = mouseX * 0.35;
+      targetY = mouseY * 0.35;
+
+      camera.position.x += (targetX - camera.position.x) * 0.04;
+      camera.position.y += (-targetY - camera.position.y) * 0.04;
+      
+      // Look slightly higher on mobile to place the translated model in the lower part of the screen
+      camera.lookAt(
+        window.innerWidth < 968 ? 0 : targetGroupPos.x - 2.2, 
+        window.innerWidth < 968 ? -0.5 : targetGroupPos.y, 
+        targetGroupPos.z
+      );
+
+      // Update Cursor Light position to track mouse and interact with physical materials
+      cursorLight.position.x += (mouseX * 5 - cursorLight.position.x) * 0.08;
+      cursorLight.position.y += (-mouseY * 5 - cursorLight.position.y) * 0.08;
+
+      // Scroll interpolation
+      const currentScroll = scrollRef.current;
+      targetScrollY += (currentScroll - targetScrollY) * 0.05;
+      const scrollFactor = targetScrollY * 0.0006;
+
+      const time = Date.now() * 0.001;
+
+      
+      if (mixer) {
+        mixer.update(clock.getDelta());
+      }
+      
+      // Rotate the entire heavy model group slowly
+      infraGroup.rotation.y = time * 0.15;
+      
+      // Layout positioning on scroll
+      infraGroup.position.y = targetGroupPos.y + Math.sin(time) * 0.05 - (scrollFactor * 0.18);
+      infraGroup.rotation.y = scrollFactor * 0.08;
+
+      // Stars floating
+      const starsArr = particlesGeometry.attributes.position.array;
+      for (let i = 0; i < particlesCount; i++) {
+        starsArr[i * 3 + 1] += particleDrift[i];
+        if (starsArr[i * 3 + 1] > 2.5) {
+          starsArr[i * 3 + 1] = -2.5;
+        }
+      }
+      particlesGeometry.attributes.position.needsUpdate = true;
+      dataParticles.rotation.y += 0.0001;
+
+      renderer.render(scene, camera);
+    };
+
+    animate();
+
+    // Clean up WebGL resources
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+      document.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("resize", handleResize);
+
+      geometriesToDispose.forEach((g) => g.dispose());
+      materialsToDispose.forEach((m) => m.dispose());
+
+      scene.remove(dataParticles);
+      scene.remove(infraGroup);
+      scene.remove(cursorLight);
+      scene.remove(pointLight1);
+      scene.remove(pointLight2);
+      scene.remove(dirLight);
+      scene.remove(ambientLight);
+
+      if (renderer.domElement.parentNode === canvasContainer) {
+        canvasContainer.removeChild(renderer.domElement);
+      }
+      canvasContainer.classList.remove("webgl-active");
+      renderer.dispose();
+    };
+  }, [mounted]);
+
   // Smooth scroll handler
   const handleNavClick = (e, targetId) => {
     e.preventDefault();
@@ -297,13 +557,7 @@ export default function Home() {
       </div>
 
       {/* Three.js Canvas Container */}
-      
-      <div id="canvas-container">
-        <Spline 
-          scene="https://prod.spline.design/KFonZGtsoUXP-qx7/scene.splinecode" 
-        />
-      </div>
-
+      <div id="canvas-container" ref={canvasContainerRef}></div>
 
 
 
