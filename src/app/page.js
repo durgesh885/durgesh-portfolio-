@@ -1068,7 +1068,7 @@ export default function Home() {
                 width="38" 
                 height="38" 
                 style={{ 
-                  borderRadius: '50%', 
+                  borderRadius: '26%', 
                   border: '1.5px solid var(--primary)', 
                   boxShadow: '0 0 8px rgba(0, 240, 255, 0.4)'
                 }}
