@@ -276,22 +276,22 @@ export default function Home() {
     canvasContainer.classList.add("webgl-active");
 
     // Lights Setup (Optimized for realistic glassmorphism and solid metal shading)
-    const ambientLight = new THREE.AmbientLight(0xffffff, isMobile ? 0.6 : 0.85);
+    const ambientLight = new THREE.AmbientLight(0xffffff, isMobile ? 0.65 : 0.85);
     scene.add(ambientLight);
 
-    const dirLight = new THREE.DirectionalLight(0xffffff, isMobile ? 1.0 : 1.8);
-    dirLight.position.set(6, 6, 5);
+    const dirLight = new THREE.DirectionalLight(0xffffff, isMobile ? 1.0 : 2.0);
+    dirLight.position.set(6, 8, 5);
     scene.add(dirLight);
 
-    const pointLight1 = new THREE.PointLight(0xff007f, isMobile ? 2.5 : 4.5, 18); // Glowing Magenta
-    pointLight1.position.set(-4, 3.5, 2.5);
+    const pointLight1 = new THREE.PointLight(0xff007f, isMobile ? 2.5 : 5.0, 18); // Glowing Magenta
+    pointLight1.position.set(-4, 3.5, 3);
     scene.add(pointLight1);
 
-    const pointLight2 = new THREE.PointLight(0x00f0ff, isMobile ? 2.5 : 4.5, 18); // Electric Cyan
-    pointLight2.position.set(4, -3.5, 2.5);
+    const pointLight2 = new THREE.PointLight(0x00f0ff, isMobile ? 2.5 : 5.0, 18); // Electric Cyan
+    pointLight2.position.set(4, -3.5, 3);
     scene.add(pointLight2);
 
-    const cursorLight = new THREE.PointLight(0xffaa00, isMobile ? 1.2 : 3.0, 14); // Dynamic Gold Light
+    const cursorLight = new THREE.PointLight(0xffaa00, isMobile ? 1.2 : 3.5, 14); // Dynamic Gold Light
     cursorLight.position.set(0, 0, 4);
     scene.add(cursorLight);
 
@@ -301,92 +301,243 @@ export default function Home() {
     const infraGroup = new THREE.Group();
     scene.add(infraGroup);
 
-    // 1. Quantum Mainframe Core (Glossy, Glass-Refracting Torus Knot)
-    const mainGeom = new THREE.TorusKnotGeometry(0.72, 0.22, 160, 20);
-    geometriesToDispose.push(mainGeom);
+    // Dynamic Server Monitor screen texture (real live scroll canvas texture)
+    const monitorCanvas = document.createElement('canvas');
+    monitorCanvas.width = 128;
+    monitorCanvas.height = 32;
+    const monitorCtx = monitorCanvas.getContext('2d');
     
-    const mainMaterial = new THREE.MeshPhysicalMaterial({
-      color: 0x00f0ff,
-      emissive: 0x031822,
-      roughness: 0.05,
-      metalness: 0.1,
-      transmission: 0.88, // Glass transparency
-      thickness: 1.6,     // Glass thickness for refraction
-      ior: 1.6,           // Index of refraction
-      transparent: true,
-      opacity: 0.9,
-      clearcoat: 1.0,
-      clearcoatRoughness: 0.05,
-      flatShading: false  // Smooth shading!
-    });
-    materialsToDispose.push(mainMaterial);
-    const mainMesh = new THREE.Mesh(mainGeom, mainMaterial);
-    infraGroup.add(mainMesh);
+    // Draw initial state
+    monitorCtx.fillStyle = '#020617';
+    monitorCtx.fillRect(0, 0, 128, 32);
+    monitorCtx.fillStyle = '#00ff66';
+    monitorCtx.font = 'bold 12px monospace';
+    monitorCtx.fillText('SYS_ACTIVE', 6, 20);
+    
+    const monitorTexture = new THREE.CanvasTexture(monitorCanvas);
+    monitorTexture.wrapS = THREE.RepeatWrapping;
+    materialsToDispose.push(monitorTexture);
 
-    // Inner Glowing Fusion Core (Solid neon pink energy orb inside the glass knot)
-    const coreGeom = new THREE.SphereGeometry(0.32, 32, 32);
-    geometriesToDispose.push(coreGeom);
-    const coreMat = new THREE.MeshStandardMaterial({
-      color: 0xff007f,
-      emissive: 0xff007f,
-      emissiveIntensity: 1.8,
+    // 1. AWS Cloud Server Cabinet (Realistic PBR textures)
+    const serverCabinet = new THREE.Group();
+    infraGroup.add(serverCabinet);
+
+    const cabinetGeom = new THREE.BoxGeometry(1.0, 1.5, 1.0);
+    geometriesToDispose.push(cabinetGeom);
+    const cabinetMat = new THREE.MeshStandardMaterial({
+      color: 0x1e293b,
+      metalness: 0.9,
+      roughness: 0.2
+    });
+    materialsToDispose.push(cabinetMat);
+    const cabinetBody = new THREE.Mesh(cabinetGeom, cabinetMat);
+    serverCabinet.add(cabinetBody);
+
+    // Server Slots (Draw 5 server modules inside the rack)
+    const slotGeom = new THREE.BoxGeometry(0.9, 0.16, 0.08);
+    geometriesToDispose.push(slotGeom);
+    const slotMat = new THREE.MeshStandardMaterial({
+      color: 0x0f172a,
+      metalness: 0.8,
+      roughness: 0.4
+    });
+    materialsToDispose.push(slotMat);
+
+    const screenGeom = new THREE.PlaneGeometry(0.34, 0.08);
+    geometriesToDispose.push(screenGeom);
+    const screenMat = new THREE.MeshBasicMaterial({
+      map: monitorTexture,
+      transparent: true
+    });
+    materialsToDispose.push(screenMat);
+
+    const powerLedMat = new THREE.MeshStandardMaterial({
+      color: 0x00ff66,
+      emissive: 0x00ff66,
+      emissiveIntensity: 1.2
+    });
+    materialsToDispose.push(powerLedMat);
+
+    const activityLedMat = new THREE.MeshStandardMaterial({
+      color: 0x00f0ff,
+      emissive: 0x00f0ff,
+      emissiveIntensity: 1.2
+    });
+    materialsToDispose.push(activityLedMat);
+    
+    const ledGeom = new THREE.SphereGeometry(0.02, 16, 16);
+    geometriesToDispose.push(ledGeom);
+
+    const activityLeds = [];
+    const serverSlots = [];
+
+    for (let i = 0; i < 5; i++) {
+      const slotContainer = new THREE.Group();
+      slotContainer.position.set(0, 0.55 - i * 0.28, 0.5); // Placed on the front face of the cabinet
+      
+      const slotMesh = new THREE.Mesh(slotGeom, slotMat);
+      slotContainer.add(slotMesh);
+
+      // Add Power LED (Green)
+      const pLed = new THREE.Mesh(ledGeom, powerLedMat);
+      pLed.position.set(-0.38, 0, 0.045);
+      slotContainer.add(pLed);
+
+      // Add Activity LED (Cyan/Blue)
+      const aLed = new THREE.Mesh(ledGeom, activityLedMat);
+      aLed.position.set(-0.32, 0, 0.045);
+      slotContainer.add(aLed);
+      activityLeds.push(aLed);
+
+      // Add Monitor Screen
+      const screenMesh = new THREE.Mesh(screenGeom, screenMat);
+      screenMesh.position.set(0.18, 0, 0.045);
+      slotContainer.add(screenMesh);
+
+      serverCabinet.add(slotContainer);
+      serverSlots.push(slotContainer);
+    }
+
+    // Front Protective Tinted Glass door
+    const glassGeom = new THREE.BoxGeometry(1.02, 1.52, 0.04);
+    geometriesToDispose.push(glassGeom);
+    const glassMat = new THREE.MeshPhysicalMaterial({
+      color: 0x00f0ff,
+      emissive: 0x001a24,
+      transmission: 0.85,
+      roughness: 0.1,
+      thickness: 0.3,
+      transparent: true,
+      opacity: 0.45
+    });
+    materialsToDispose.push(glassMat);
+    const glassDoor = new THREE.Mesh(glassGeom, glassMat);
+    glassDoor.position.set(0, 0, 0.53);
+    serverCabinet.add(glassDoor);
+
+    // 2. Realistic 3D Cloud Floating above the Server Cabinet
+    const cloudGroup = new THREE.Group();
+    infraGroup.add(cloudGroup);
+
+    const cloudMaterial = new THREE.MeshPhysicalMaterial({
+      color: 0xffffff,
+      emissive: 0x001b2b,
+      transmission: 0.82, // Semitransparent glassy cloud
+      thickness: 0.9,
+      roughness: 0.15,
+      clearcoat: 1.0,
+      clearcoatRoughness: 0.1,
+      transparent: true,
+      opacity: 0.88
+    });
+    materialsToDispose.push(cloudMaterial);
+
+    const sphereGeoms = [
+      new THREE.SphereGeometry(0.38, 32, 32), // Center
+      new THREE.SphereGeometry(0.26, 32, 32), // Left
+      new THREE.SphereGeometry(0.28, 32, 32), // Right
+      new THREE.SphereGeometry(0.28, 32, 32)  // Top
+    ];
+    sphereGeoms.forEach((g) => geometriesToDispose.push(g));
+
+    const cloudCenter = new THREE.Mesh(sphereGeoms[0], cloudMaterial);
+    cloudCenter.position.set(0, 1.1, 0);
+    cloudGroup.add(cloudCenter);
+
+    const cloudLeft = new THREE.Mesh(sphereGeoms[1], cloudMaterial);
+    cloudLeft.position.set(-0.32, 1.0, 0);
+    cloudGroup.add(cloudLeft);
+
+    const cloudRight = new THREE.Mesh(sphereGeoms[2], cloudMaterial);
+    cloudRight.position.set(0.32, 1.0, 0);
+    cloudGroup.add(cloudRight);
+
+    const cloudTop = new THREE.Mesh(sphereGeoms[3], cloudMaterial);
+    cloudTop.position.set(0, 1.24, 0);
+    cloudGroup.add(cloudTop);
+
+    // 3. AWS RDS Database Cylinder Nodes (Realistic metal tanks with glowing capacity indicators)
+    const dbGroup = new THREE.Group();
+    infraGroup.add(dbGroup);
+    dbGroup.position.set(-1.3, -0.2, 0);
+
+    const dbChassisGeom = new THREE.CylinderGeometry(0.28, 0.28, 0.9, 32);
+    geometriesToDispose.push(dbChassisGeom);
+    const dbChassisMat = new THREE.MeshStandardMaterial({
+      color: 0x334155, // Steel dark gray
+      metalness: 0.95,
+      roughness: 0.1
+    });
+    materialsToDispose.push(dbChassisMat);
+    const dbChassis = new THREE.Mesh(dbChassisGeom, dbChassisMat);
+    dbGroup.add(dbChassis);
+
+    // Glowing Capacity/Status Bands on database
+    const dbBandGeom = new THREE.CylinderGeometry(0.29, 0.29, 0.05, 32);
+    geometriesToDispose.push(dbBandGeom);
+    const dbBandMat = new THREE.MeshStandardMaterial({
+      color: 0x00f0ff,
+      emissive: 0x00f0ff,
+      emissiveIntensity: 1.5,
       roughness: 0.1,
       metalness: 0.5
     });
-    materialsToDispose.push(coreMat);
-    const coreMesh = new THREE.Mesh(coreGeom, coreMat);
-    infraGroup.add(coreMesh);
+    materialsToDispose.push(dbBandMat);
 
-    // 2. Orbiting Cloud Nodes (Solid metallic spheres and capsules - NO wireframes/lines)
-    const nodesGroup = new THREE.Group();
-    infraGroup.add(nodesGroup);
-
-    const nodes = [];
-    const nodeCount = 4;
-    const nodeGeometries = [
-      new THREE.SphereGeometry(0.2, 32, 32),
-      new THREE.CapsuleGeometry(0.12, 0.26, 8, 16),
-      new THREE.SphereGeometry(0.18, 32, 32),
-      new THREE.CapsuleGeometry(0.1, 0.24, 8, 16)
-    ];
-    nodeGeometries.forEach((g) => geometriesToDispose.push(g));
-
-    const nodeMaterials = [
-      new THREE.MeshStandardMaterial({ color: 0xffaa00, roughness: 0.08, metalness: 0.95 }), // Glossy Gold
-      new THREE.MeshStandardMaterial({ color: 0x00ffd2, roughness: 0.05, metalness: 0.9 }),  // Glossy Teal
-      new THREE.MeshPhysicalMaterial({ color: 0xff007f, transmission: 0.8, roughness: 0.1, thickness: 0.6, transparent: true }), // Glassy Pink
-      new THREE.MeshStandardMaterial({ color: 0xbd00ff, roughness: 0.1, metalness: 0.9 })  // Glossy Purple
-    ];
-    nodeMaterials.forEach((m) => materialsToDispose.push(m));
-
-    for (let i = 0; i < nodeCount; i++) {
-      const nodeMesh = new THREE.Mesh(nodeGeometries[i], nodeMaterials[i]);
-
-      const angle = (i / nodeCount) * Math.PI * 2;
-      const orbitRadius = 1.65 + i * 0.24;
-      const orbitSpeed = 0.45 + i * 0.15;
-      const floatOffset = Math.random() * Math.PI * 2;
-
-      nodeMesh.position.set(
-        Math.cos(angle) * orbitRadius,
-        (Math.random() - 0.5) * 0.4,
-        Math.sin(angle) * orbitRadius
-      );
-      nodesGroup.add(nodeMesh);
-
-      nodes.push({
-        mesh: nodeMesh,
-        radius: orbitRadius,
-        speed: orbitSpeed,
-        angle: angle,
-        floatOffset: floatOffset,
-        initialY: nodeMesh.position.y
-      });
+    const dbBands = [];
+    for (let i = 0; i < 3; i++) {
+      const dbBand = new THREE.Mesh(dbBandGeom, dbBandMat);
+      dbBand.position.set(0, 0.3 - i * 0.3, 0);
+      dbGroup.add(dbBand);
+      dbBands.push(dbBand);
     }
 
-    // 3. Nebula Dust Particles (Soft dust field - NO lines/grids)
+    // 4. AWS Network Router/Processor Hub
+    const routerGroup = new THREE.Group();
+    infraGroup.add(routerGroup);
+    routerGroup.position.set(1.3, -0.4, 0);
+
+    const routerGeom = new THREE.BoxGeometry(0.65, 0.16, 0.65);
+    geometriesToDispose.push(routerGeom);
+    const routerMat = new THREE.MeshStandardMaterial({
+      color: 0x475569, // Slate gray
+      metalness: 0.9,
+      roughness: 0.15
+    });
+    materialsToDispose.push(routerMat);
+    const routerMesh = new THREE.Mesh(routerGeom, routerMat);
+    routerGroup.add(routerMesh);
+
+    // Add glowing antenna array or CPU node
+    const antennaGeom = new THREE.CylinderGeometry(0.015, 0.015, 0.3, 8);
+    geometriesToDispose.push(antennaGeom);
+    const antennaMat = new THREE.MeshStandardMaterial({
+      color: 0x0e172c,
+      metalness: 0.9,
+      roughness: 0.2
+    });
+    materialsToDispose.push(antennaMat);
+
+    const antennaLedGeom = new THREE.SphereGeometry(0.02, 8, 8);
+    geometriesToDispose.push(antennaLedGeom);
+    const antennaLedMat = new THREE.MeshBasicMaterial({
+      color: 0xff007f // Pink status beacon
+    });
+    materialsToDispose.push(antennaLedMat);
+
+    for (let i = 0; i < 2; i++) {
+      const ant = new THREE.Mesh(antennaGeom, antennaMat);
+      ant.position.set(-0.2 + i * 0.4, 0.15, -0.2);
+      routerGroup.add(ant);
+
+      const beacon = new THREE.Mesh(antennaLedGeom, antennaLedMat);
+      beacon.position.set(-0.2 + i * 0.4, 0.3, -0.2);
+      routerGroup.add(beacon);
+    }
+
+    // 5. Nebula Ambient Dust Particles
     const particlesGeometry = new THREE.BufferGeometry();
-    const particlesCount = isMobile ? 35 : 85;
+    const particlesCount = isMobile ? 30 : 75;
     const positions = new Float32Array(particlesCount * 3);
     const colors = new Float32Array(particlesCount * 3);
     const particleDrift = [];
@@ -394,7 +545,6 @@ export default function Home() {
     const starColors = [
       new THREE.Color(0x00f0ff),
       new THREE.Color(0xff007f),
-      new THREE.Color(0xbd00ff),
       new THREE.Color(0x00ffd2)
     ];
 
@@ -415,10 +565,10 @@ export default function Home() {
     geometriesToDispose.push(particlesGeometry);
 
     const particlesMaterial = new THREE.PointsMaterial({
-      size: isMobile ? 0.065 : 0.09,
+      size: isMobile ? 0.065 : 0.08,
       vertexColors: true,
       transparent: true,
-      opacity: 0.35, // Very soft opacity for natural depth
+      opacity: 0.32,
       blending: THREE.AdditiveBlending
     });
     materialsToDispose.push(particlesMaterial);
@@ -450,10 +600,10 @@ export default function Home() {
     const checkModelVisibility = () => {
       if (window.innerWidth < 968) {
         // Shifted further down and scaled down on mobile to clear text layout space
-        targetGroupPos.set(0, -2.2, -3.0); 
-        infraGroup.scale.set(0.58, 0.58, 0.58);
+        targetGroupPos.set(0, -2.1, -2.8); 
+        infraGroup.scale.set(0.68, 0.68, 0.68);
       } else {
-        targetGroupPos.set(4.25, 0.25, -1.35);
+        targetGroupPos.set(4.0, 0.2, -1.2);
         infraGroup.scale.set(1.28, 1.28, 1.28);
       }
       infraGroup.position.copy(targetGroupPos);
@@ -474,6 +624,8 @@ export default function Home() {
     // Render loop
     let animationFrameId;
     let targetScrollY = 0;
+    let canvasOffset = 0;
+
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);
 
@@ -486,8 +638,8 @@ export default function Home() {
       
       // Look slightly higher on mobile to place the translated model in the lower part of the screen
       camera.lookAt(
-        window.innerWidth < 968 ? 0 : targetGroupPos.x - 2.4, 
-        window.innerWidth < 968 ? -0.6 : targetGroupPos.y, 
+        window.innerWidth < 968 ? 0 : targetGroupPos.x - 2.2, 
+        window.innerWidth < 968 ? -0.5 : targetGroupPos.y, 
         targetGroupPos.z
       );
 
@@ -502,37 +654,59 @@ export default function Home() {
 
       const time = Date.now() * 0.001;
 
-      // Dynamic HSL shift for the main glass color to make it vibrant and colourful!
-      const hue = (time * 0.025) % 1;
-      mainMaterial.color.setHSL(hue, 0.9, 0.55);
+      // 1. Rotate server cabinet slowly
+      serverCabinet.rotation.y = time * 0.15;
+      
+      // 2. Floating cloud effect above cabinet
+      cloudGroup.position.y = Math.sin(time * 2.2) * 0.08;
+      cloudGroup.rotation.y = time * 0.08;
 
-      // Rotate glass torus knot
-      mainMesh.rotation.y += 0.006;
-      mainMesh.rotation.x += 0.003;
-
-      // Rotate fusion core
-      coreMesh.rotation.y -= 0.008;
-
-      // Orbiting solid cubes/capsules movement
-      nodes.forEach((n) => {
-        n.angle += 0.005 * n.speed;
-        
-        // Orbital positions
-        n.mesh.position.x = Math.cos(n.angle) * n.radius;
-        n.mesh.position.z = Math.sin(n.angle) * n.radius;
-        
-        // Float y-axis
-        n.mesh.position.y = n.initialY + Math.sin(time * 1.5 + n.floatOffset) * 0.12;
-
-        // Individual rotations
-        n.mesh.rotation.x += 0.006;
-        n.mesh.rotation.y += 0.008;
+      // 3. Database node rotation & band glowing pulse
+      dbGroup.rotation.y = -time * 0.12;
+      dbBands.forEach((band, idx) => {
+        band.material.emissiveIntensity = 1.0 + Math.sin(time * 4 + idx) * 0.4;
       });
 
+      // 4. Router node rotation
+      routerGroup.rotation.y = time * 0.2;
+
+      // 5. Blink activity LEDs on server slots
+      activityLeds.forEach((led) => {
+        if (Math.random() < 0.06) {
+          led.material.emissiveIntensity = Math.random() < 0.5 ? 0.3 : 1.8;
+          led.material.color.setHex(Math.random() < 0.6 ? 0x00f0ff : 0x054a6b);
+        }
+      });
+
+      // 6. Scroll text/wave on monitor screens
+      canvasOffset -= 1.2;
+      if (canvasOffset < -128) canvasOffset = 0;
+      
+      monitorCtx.fillStyle = '#020617';
+      monitorCtx.fillRect(0, 0, 128, 32);
+      
+      // Draw grid text
+      monitorCtx.fillStyle = '#00ff66';
+      monitorCtx.font = 'bold 11px monospace';
+      monitorCtx.fillText('SYS_OK', 4, 18);
+      
+      // Draw scrolling wave
+      monitorCtx.strokeStyle = '#00f0ff';
+      monitorCtx.lineWidth = 1.8;
+      monitorCtx.beginPath();
+      for (let x = 0; x < 65; x++) {
+        const cx = x + 60;
+        const cy = 14 + Math.sin((x + canvasOffset) * 0.15) * 6;
+        if (x === 0) monitorCtx.moveTo(cx, cy);
+        else monitorCtx.lineTo(cx, cy);
+      }
+      monitorCtx.stroke();
+      
+      monitorTexture.needsUpdate = true;
+
       // Layout positioning on scroll
-      infraGroup.position.y = targetGroupPos.y + Math.sin(time) * 0.1 - (scrollFactor * 0.18);
-      infraGroup.rotation.y = Math.sin(time * 0.35) * 0.12 + scrollFactor * 0.1;
-      infraGroup.rotation.x = Math.sin(time * 0.25) * 0.03;
+      infraGroup.position.y = targetGroupPos.y + Math.sin(time) * 0.05 - (scrollFactor * 0.18);
+      infraGroup.rotation.y = scrollFactor * 0.08;
 
       // Stars floating
       const starsArr = particlesGeometry.attributes.position.array;
@@ -543,7 +717,7 @@ export default function Home() {
         }
       }
       particlesGeometry.attributes.position.needsUpdate = true;
-      dataParticles.rotation.y += 0.00015;
+      dataParticles.rotation.y += 0.0001;
 
       renderer.render(scene, camera);
     };
