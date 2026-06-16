@@ -1063,7 +1063,7 @@ export default function Home() {
           <a href="#home" className="logo" onClick={(e) => handleNavClick(e, "home")}>
             <div className="logo-icon" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <img 
-                src="/logo.png" 
+                src="/logo.jpg" 
                 alt="Durgesh Logo" 
                 width="38" 
                 height="38" 
