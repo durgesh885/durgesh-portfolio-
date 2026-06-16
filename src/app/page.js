@@ -1017,9 +1017,9 @@ export default function Home() {
 
     const checkModelVisibility = () => {
       if (window.innerWidth < 968) {
-        // Shifted further down and scaled down on mobile to clear text layout space
-        targetGroupPos.set(0, -2.1, -2.8); 
-        infraGroup.scale.set(0.68, 0.68, 0.68);
+        // Place the server rack cluster prominently in the center background of the mobile hero
+        targetGroupPos.set(0, -0.9, -1.8); 
+        infraGroup.scale.set(0.92, 0.92, 0.92);
       } else {
         targetGroupPos.set(4.0, 0.2, -1.2);
         infraGroup.scale.set(1.28, 1.28, 1.28);
