@@ -300,7 +300,7 @@ export default function Home() {
       
       <div id="canvas-container">
         <Spline 
-          scene="https://prod.spline.design/6Wq1Q7YGyM-iab9i/scene.splinecode" 
+          scene="https://prod.spline.design/KFonZGtsoUXP-qx7/scene.splinecode" 
         />
       </div>
 
