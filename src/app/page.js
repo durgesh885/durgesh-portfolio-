@@ -275,21 +275,25 @@ export default function Home() {
     canvasContainer.appendChild(renderer.domElement);
     canvasContainer.classList.add("webgl-active");
 
-    // Lights
-    const ambientLight = new THREE.AmbientLight(0xffffff, isMobile ? 0.45 : 0.72);
+    // Lights Setup (Optimized for realistic glassmorphism and solid metal shading)
+    const ambientLight = new THREE.AmbientLight(0xffffff, isMobile ? 0.6 : 0.85);
     scene.add(ambientLight);
 
-    const directionalLight1 = new THREE.DirectionalLight(0x00f0ff, isMobile ? 1.0 : 1.8);
-    directionalLight1.position.set(5, 7, 6);
-    scene.add(directionalLight1);
+    const dirLight = new THREE.DirectionalLight(0xffffff, isMobile ? 1.0 : 1.8);
+    dirLight.position.set(6, 6, 5);
+    scene.add(dirLight);
 
-    const pointLight = new THREE.PointLight(0x0055ff, isMobile ? 1.8 : 3.2, 48);
-    pointLight.position.set(-3.5, 2.5, 2);
-    scene.add(pointLight);
+    const pointLight1 = new THREE.PointLight(0xff007f, isMobile ? 2.5 : 4.5, 18); // Glowing Magenta
+    pointLight1.position.set(-4, 3.5, 2.5);
+    scene.add(pointLight1);
 
-    const pointLight2 = new THREE.PointLight(0xff007f, isMobile ? 1.5 : 2.5, 34); // Neon pink ambient light
-    pointLight2.position.set(4, -1.5, 3);
+    const pointLight2 = new THREE.PointLight(0x00f0ff, isMobile ? 2.5 : 4.5, 18); // Electric Cyan
+    pointLight2.position.set(4, -3.5, 2.5);
     scene.add(pointLight2);
+
+    const cursorLight = new THREE.PointLight(0xffaa00, isMobile ? 1.2 : 3.0, 14); // Dynamic Gold Light
+    cursorLight.position.set(0, 0, 4);
+    scene.add(cursorLight);
 
     const geometriesToDispose = [];
     const materialsToDispose = [];
@@ -297,198 +301,108 @@ export default function Home() {
     const infraGroup = new THREE.Group();
     scene.add(infraGroup);
 
-    // 1. Quantum Mainframe Core (Glass Refracting Octahedron)
-    const coreGeometry = new THREE.OctahedronGeometry(0.65, 1);
-    geometriesToDispose.push(coreGeometry);
-    const coreMaterial = new THREE.MeshPhysicalMaterial({
+    // 1. Quantum Mainframe Core (Glossy, Glass-Refracting Torus Knot)
+    const mainGeom = new THREE.TorusKnotGeometry(0.72, 0.22, 160, 20);
+    geometriesToDispose.push(mainGeom);
+    
+    const mainMaterial = new THREE.MeshPhysicalMaterial({
       color: 0x00f0ff,
-      emissive: 0x052e3d,
-      roughness: 0.1,
-      metalness: 0.9,
-      transmission: 0.75, // Glass transparency
-      thickness: 1.2,
+      emissive: 0x031822,
+      roughness: 0.05,
+      metalness: 0.1,
+      transmission: 0.88, // Glass transparency
+      thickness: 1.6,     // Glass thickness for refraction
+      ior: 1.6,           // Index of refraction
       transparent: true,
-      opacity: 0.85,
-      flatShading: true,
+      opacity: 0.9,
       clearcoat: 1.0,
-      clearcoatRoughness: 0.1
+      clearcoatRoughness: 0.05,
+      flatShading: false  // Smooth shading!
     });
-    materialsToDispose.push(coreMaterial);
-    const coreMesh = new THREE.Mesh(coreGeometry, coreMaterial);
+    materialsToDispose.push(mainMaterial);
+    const mainMesh = new THREE.Mesh(mainGeom, mainMaterial);
+    infraGroup.add(mainMesh);
+
+    // Inner Glowing Fusion Core (Solid neon pink energy orb inside the glass knot)
+    const coreGeom = new THREE.SphereGeometry(0.32, 32, 32);
+    geometriesToDispose.push(coreGeom);
+    const coreMat = new THREE.MeshStandardMaterial({
+      color: 0xff007f,
+      emissive: 0xff007f,
+      emissiveIntensity: 1.8,
+      roughness: 0.1,
+      metalness: 0.5
+    });
+    materialsToDispose.push(coreMat);
+    const coreMesh = new THREE.Mesh(coreGeom, coreMat);
     infraGroup.add(coreMesh);
 
-    // Inner Glowing Fusion Core (Shining from inside the glass octahedron)
-    const innerCoreGeom = new THREE.SphereGeometry(0.24, 16, 16);
-    geometriesToDispose.push(innerCoreGeom);
-    const innerCoreMat = new THREE.MeshBasicMaterial({
-      color: 0xff007f, // Neon Pink hot core
-      transparent: true,
-      opacity: 0.95
-    });
-    materialsToDispose.push(innerCoreMat);
-    const innerCoreMesh = new THREE.Mesh(innerCoreGeom, innerCoreMat);
-    infraGroup.add(innerCoreMesh);
-
-    // 2. Orbiting Cloud Server Nodes (Glass-like floating cubes with colorful wireframe borders)
+    // 2. Orbiting Cloud Nodes (Solid metallic spheres and capsules - NO wireframes/lines)
     const nodesGroup = new THREE.Group();
     infraGroup.add(nodesGroup);
 
     const nodes = [];
-    const nodeCount = isMobile ? 4 : 6;
-    const nodeColors = [0x00f0ff, 0xff007f, 0x00ffd2, 0xffaa00, 0xbd00ff, 0xff0055];
+    const nodeCount = 4;
+    const nodeGeometries = [
+      new THREE.SphereGeometry(0.2, 32, 32),
+      new THREE.CapsuleGeometry(0.12, 0.26, 8, 16),
+      new THREE.SphereGeometry(0.18, 32, 32),
+      new THREE.CapsuleGeometry(0.1, 0.24, 8, 16)
+    ];
+    nodeGeometries.forEach((g) => geometriesToDispose.push(g));
 
-    // Shared geometry for server nodes
-    const nodeGeom = new THREE.BoxGeometry(0.34, 0.46, 0.18);
-    geometriesToDispose.push(nodeGeom);
-    const edgeGeom = new THREE.BoxGeometry(0.35, 0.47, 0.19);
-    geometriesToDispose.push(edgeGeom);
+    const nodeMaterials = [
+      new THREE.MeshStandardMaterial({ color: 0xffaa00, roughness: 0.08, metalness: 0.95 }), // Glossy Gold
+      new THREE.MeshStandardMaterial({ color: 0x00ffd2, roughness: 0.05, metalness: 0.9 }),  // Glossy Teal
+      new THREE.MeshPhysicalMaterial({ color: 0xff007f, transmission: 0.8, roughness: 0.1, thickness: 0.6, transparent: true }), // Glassy Pink
+      new THREE.MeshStandardMaterial({ color: 0xbd00ff, roughness: 0.1, metalness: 0.9 })  // Glossy Purple
+    ];
+    nodeMaterials.forEach((m) => materialsToDispose.push(m));
 
     for (let i = 0; i < nodeCount; i++) {
-      const nodeContainer = new THREE.Group();
+      const nodeMesh = new THREE.Mesh(nodeGeometries[i], nodeMaterials[i]);
 
-      const nodeMat = new THREE.MeshStandardMaterial({
-        color: 0x090d16,
-        roughness: 0.15,
-        metalness: 0.9,
-        transparent: true,
-        opacity: 0.9
-      });
-      if (i === 0) materialsToDispose.push(nodeMat);
-
-      const nodeMesh = new THREE.Mesh(nodeGeom, nodeMat);
-      nodeContainer.add(nodeMesh);
-
-      const edgeMat = new THREE.MeshBasicMaterial({
-        color: nodeColors[i % nodeColors.length],
-        wireframe: true,
-        transparent: true,
-        opacity: 0.8,
-        blending: THREE.AdditiveBlending
-      });
-      materialsToDispose.push(edgeMat);
-
-      const edgeMesh = new THREE.Mesh(edgeGeom, edgeMat);
-      nodeContainer.add(edgeMesh);
-
-      // Set orbit parameters
       const angle = (i / nodeCount) * Math.PI * 2;
-      const orbitRadius = 1.7 + i * 0.22;
-      const orbitSpeed = 0.3 + (nodeCount - i) * 0.12;
+      const orbitRadius = 1.65 + i * 0.24;
+      const orbitSpeed = 0.45 + i * 0.15;
       const floatOffset = Math.random() * Math.PI * 2;
 
-      nodeContainer.position.set(
+      nodeMesh.position.set(
         Math.cos(angle) * orbitRadius,
-        (Math.random() - 0.5) * 0.6,
+        (Math.random() - 0.5) * 0.4,
         Math.sin(angle) * orbitRadius
       );
-      nodesGroup.add(nodeContainer);
+      nodesGroup.add(nodeMesh);
 
       nodes.push({
-        container: nodeContainer,
         mesh: nodeMesh,
-        edge: edgeMesh,
         radius: orbitRadius,
         speed: orbitSpeed,
         angle: angle,
         floatOffset: floatOffset,
-        initialY: nodeContainer.position.y
+        initialY: nodeMesh.position.y
       });
     }
 
-    // 3. Glowing Orbital Track Rings
-    const ringGeom1 = new THREE.TorusGeometry(1.4, 0.012, 8, 64);
-    geometriesToDispose.push(ringGeom1);
-    const ringMat1 = new THREE.MeshBasicMaterial({
-      color: 0x00f0ff,
-      transparent: true,
-      opacity: 0.3,
-      blending: THREE.AdditiveBlending
-    });
-    materialsToDispose.push(ringMat1);
-    const ringMesh1 = new THREE.Mesh(ringGeom1, ringMat1);
-    ringMesh1.rotation.x = Math.PI / 2.1;
-    infraGroup.add(ringMesh1);
-
-    const ringGeom2 = new THREE.TorusGeometry(2.1, 0.012, 8, 64);
-    geometriesToDispose.push(ringGeom2);
-    const ringMat2 = new THREE.MeshBasicMaterial({
-      color: 0xff007f,
-      transparent: true,
-      opacity: 0.25,
-      blending: THREE.AdditiveBlending
-    });
-    materialsToDispose.push(ringMat2);
-    const ringMesh2 = new THREE.Mesh(ringGeom2, ringMat2);
-    ringMesh2.rotation.x = -Math.PI / 2.3;
-    infraGroup.add(ringMesh2);
-
-    // 4. Data Packets (Flying light points along the server node paths)
-    const packetCount = isMobile ? 15 : 30;
-    const packetPositions = new Float32Array(packetCount * 3);
-    const packetData = [];
-
-    for (let i = 0; i < packetCount; i++) {
-      const angle = Math.random() * Math.PI * 2;
-      const radius = 1.4 + Math.random() * 0.8;
-      const speed = 0.005 + Math.random() * 0.012;
-      const yOffset = (Math.random() - 0.5) * 0.5;
-
-      packetPositions[i * 3] = Math.cos(angle) * radius;
-      packetPositions[i * 3 + 1] = yOffset;
-      packetPositions[i * 3 + 2] = Math.sin(angle) * radius;
-
-      packetData.push({
-        radius,
-        angle,
-        speed,
-        yOffset
-      });
-    }
-
-    const packetGeom = new THREE.BufferGeometry();
-    packetGeom.setAttribute('position', new THREE.BufferAttribute(packetPositions, 3));
-    geometriesToDispose.push(packetGeom);
-
-    const packetMat = new THREE.PointsMaterial({
-      size: isMobile ? 0.09 : 0.14,
-      color: 0x00ffd2,
-      transparent: true,
-      opacity: 0.8,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false
-    });
-    materialsToDispose.push(packetMat);
-
-    const dataPackets = new THREE.Points(packetGeom, packetMat);
-    infraGroup.add(dataPackets);
-
-    // Grid helper under the core
-    const gridHelper = new THREE.GridHelper(48, isMobile ? 18 : 36, 0x00f0ff, 0x090d16);
-    gridHelper.position.y = -3.8;
-    gridHelper.position.z = -2;
-    gridHelper.material.opacity = 0.12;
-    gridHelper.material.transparent = true;
-    scene.add(gridHelper);
-
-    // 5. Nebula Starfield (Multi-colored glowing background particles)
+    // 3. Nebula Dust Particles (Soft dust field - NO lines/grids)
     const particlesGeometry = new THREE.BufferGeometry();
-    const particlesCount = isMobile ? 65 : 160;
+    const particlesCount = isMobile ? 35 : 85;
     const positions = new Float32Array(particlesCount * 3);
     const colors = new Float32Array(particlesCount * 3);
     const particleDrift = [];
 
     const starColors = [
-      new THREE.Color(0x00f0ff), // Electric Cyan
-      new THREE.Color(0xff007f), // Hot Pink
-      new THREE.Color(0x00ffd2), // Teal
-      new THREE.Color(0xbd00ff)  // Purple
+      new THREE.Color(0x00f0ff),
+      new THREE.Color(0xff007f),
+      new THREE.Color(0xbd00ff),
+      new THREE.Color(0x00ffd2)
     ];
 
     for (let i = 0; i < particlesCount; i++) {
       positions[i * 3] = (Math.random() - 0.5) * 11;
-      positions[i * 3 + 1] = (Math.random() - 0.5) * 5;
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 6;
       positions[i * 3 + 2] = (Math.random() - 0.5) * 6;
-      particleDrift.push(0.001 + Math.random() * 0.002);
+      particleDrift.push(0.0008 + Math.random() * 0.0012);
 
       const color = starColors[Math.floor(Math.random() * starColors.length)];
       colors[i * 3] = color.r;
@@ -501,21 +415,16 @@ export default function Home() {
     geometriesToDispose.push(particlesGeometry);
 
     const particlesMaterial = new THREE.PointsMaterial({
-      size: 0.045,
+      size: isMobile ? 0.065 : 0.09,
       vertexColors: true,
       transparent: true,
-      opacity: 0.45,
+      opacity: 0.35, // Very soft opacity for natural depth
       blending: THREE.AdditiveBlending
     });
     materialsToDispose.push(particlesMaterial);
 
     const dataParticles = new THREE.Points(particlesGeometry, particlesMaterial);
     scene.add(dataParticles);
-
-    // 6. Interactive Cursor Light (adds dynamic specular shading on glass/metal)
-    const cursorLight = new THREE.PointLight(0x00f0ff, isMobile ? 1.2 : 2.8, 14);
-    cursorLight.position.set(0, 0, 3);
-    scene.add(cursorLight);
 
     camera.position.z = 7;
 
@@ -541,11 +450,11 @@ export default function Home() {
     const checkModelVisibility = () => {
       if (window.innerWidth < 968) {
         // Shifted further down and scaled down on mobile to clear text layout space
-        targetGroupPos.set(0, -2.4, -3.2); 
-        infraGroup.scale.set(0.46, 0.46, 0.46);
+        targetGroupPos.set(0, -2.2, -3.0); 
+        infraGroup.scale.set(0.58, 0.58, 0.58);
       } else {
         targetGroupPos.set(4.25, 0.25, -1.35);
-        infraGroup.scale.set(1.08, 1.08, 1.08);
+        infraGroup.scale.set(1.28, 1.28, 1.28);
       }
       infraGroup.position.copy(targetGroupPos);
     };
@@ -593,60 +502,37 @@ export default function Home() {
 
       const time = Date.now() * 0.001;
 
-      // Dynamic HSL shift for the core color to make it vibrant and colourful!
-      const hue = (time * 0.03) % 1;
-      coreMaterial.color.setHSL(hue, 0.95, 0.55);
+      // Dynamic HSL shift for the main glass color to make it vibrant and colourful!
+      const hue = (time * 0.025) % 1;
+      mainMaterial.color.setHSL(hue, 0.9, 0.55);
 
-      // Rotate core
-      coreMesh.rotation.y -= 0.004;
-      coreMesh.rotation.x -= 0.0015;
+      // Rotate glass torus knot
+      mainMesh.rotation.y += 0.006;
+      mainMesh.rotation.x += 0.003;
 
-      // Pulse the inner core
-      const pulse = 1.0 + Math.sin(time * 6) * 0.12;
-      innerCoreMesh.scale.set(pulse, pulse, pulse);
+      // Rotate fusion core
+      coreMesh.rotation.y -= 0.008;
 
-      // Orbiting cubes movement
+      // Orbiting solid cubes/capsules movement
       nodes.forEach((n) => {
-        n.angle += 0.004 * n.speed;
+        n.angle += 0.005 * n.speed;
         
         // Orbital positions
-        n.container.position.x = Math.cos(n.angle) * n.radius;
-        n.container.position.z = Math.sin(n.angle) * n.radius;
+        n.mesh.position.x = Math.cos(n.angle) * n.radius;
+        n.mesh.position.z = Math.sin(n.angle) * n.radius;
         
         // Float y-axis
-        n.container.position.y = n.initialY + Math.sin(time * 2 + n.floatOffset) * 0.16;
+        n.mesh.position.y = n.initialY + Math.sin(time * 1.5 + n.floatOffset) * 0.12;
 
         // Individual rotations
-        n.container.rotation.x += 0.005;
-        n.container.rotation.y += 0.008;
+        n.mesh.rotation.x += 0.006;
+        n.mesh.rotation.y += 0.008;
       });
-
-      // Rotate rings in opposite directions
-      ringMesh1.rotation.z += 0.0015;
-      ringMesh2.rotation.z -= 0.0012;
-
-      // Update flying data packets
-      const positionsArr = packetGeom.attributes.position.array;
-      packetData.forEach((p, idx) => {
-        p.angle += p.speed;
-        positionsArr[idx * 3] = Math.cos(p.angle) * p.radius;
-        positionsArr[idx * 3 + 2] = Math.sin(p.angle) * p.radius;
-        // Pulse Y-height slightly
-        positionsArr[idx * 3 + 1] = p.yOffset + Math.sin(time + idx) * 0.1;
-      });
-      packetGeom.attributes.position.needsUpdate = true;
 
       // Layout positioning on scroll
       infraGroup.position.y = targetGroupPos.y + Math.sin(time) * 0.1 - (scrollFactor * 0.18);
       infraGroup.rotation.y = Math.sin(time * 0.35) * 0.12 + scrollFactor * 0.1;
       infraGroup.rotation.x = Math.sin(time * 0.25) * 0.03;
-
-      // Infinite scrolling grid (illusion of movement)
-      gridHelper.position.z += 0.012;
-      if (gridHelper.position.z >= 1.15) {
-        gridHelper.position.z = 0;
-      }
-      gridHelper.rotation.y = mouseX * 0.05;
 
       // Stars floating
       const starsArr = particlesGeometry.attributes.position.array;
@@ -673,12 +559,13 @@ export default function Home() {
       geometriesToDispose.forEach((g) => g.dispose());
       materialsToDispose.forEach((m) => m.dispose());
 
-      gridHelper.geometry.dispose();
-      gridHelper.material.dispose();
       scene.remove(dataParticles);
-      scene.remove(gridHelper);
       scene.remove(infraGroup);
       scene.remove(cursorLight);
+      scene.remove(pointLight1);
+      scene.remove(pointLight2);
+      scene.remove(dirLight);
+      scene.remove(ambientLight);
 
       if (renderer.domElement.parentNode === canvasContainer) {
         canvasContainer.removeChild(renderer.domElement);
