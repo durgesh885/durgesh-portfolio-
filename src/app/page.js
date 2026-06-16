@@ -692,15 +692,22 @@ export default function Home() {
               bladeGroup.add(latch);
             }
 
-            // Standard Blade status indicators (Power, Disk, Network)
-            const ledPositions = [0.46, 0.51, 0.56];
-            const ledColors = [colorLedGreen, colorLedCyan, colorLedMagenta];
+            // Standard Blade status indicators - Expanded to 6 LEDs (lots of blue/cyan lights!)
+            const ledPositions = [0.42, 0.46, 0.50, 0.54, 0.58, 0.62];
+            const ledColors = [
+              colorLedCyan,   // Blue/Cyan
+              colorLedCyan,   // Blue/Cyan
+              colorLedGreen,  // Green
+              colorLedCyan,   // Blue/Cyan
+              colorLedOrange, // Amber/Orange
+              colorLedGreen   // Green
+            ];
             ledPositions.forEach((lx, idx) => {
-              const ledGeo = new THREE.SphereGeometry(0.015, 8, 8);
+              const ledGeo = new THREE.SphereGeometry(0.012, 8, 8);
               const ledMat = new THREE.MeshStandardMaterial({
                 color: 0x111111,
                 emissive: ledColors[idx],
-                emissiveIntensity: Math.random() > 0.35 ? 2.5 : 0.1
+                emissiveIntensity: Math.random() > 0.3 ? 2.5 : 0.1
               });
               const led = new THREE.Mesh(ledGeo, ledMat);
               led.position.set(lx, 0.04, 0.755);
@@ -709,7 +716,7 @@ export default function Home() {
               leds.push({
                 mesh: led,
                 baseColor: ledColors[idx],
-                speed: 0.08 + Math.random() * 0.16,
+                speed: 0.07 + Math.random() * 0.18,
                 offset: Math.random() * Math.PI
               });
             });
@@ -763,6 +770,73 @@ export default function Home() {
 
         clusterGroup.add(rackGroup);
       }
+
+      // 3. Helper to calculate port global position for patch cables
+      const getPortGlobalPos = (rackIndex, bladeIndex, col) => {
+        const rx = (rackIndex - 1) * rackSpacing;
+        const rz = rackIndex === 1 ? 0 : -0.25;
+        const ry = rackIndex === 0 ? 0.12 : rackIndex === 2 ? -0.12 : 0;
+        
+        const startY = -1.5;
+        const spacingY = 0.3;
+        const posY = startY + bladeIndex * spacingY;
+        
+        const localX = -0.42 + col * 0.08;
+        const localY = 0.02;
+        const localZ = 0.755;
+        
+        const cosRy = Math.cos(ry);
+        const sinRy = Math.sin(ry);
+        
+        const globalX = localX * cosRy + localZ * sinRy + rx;
+        const globalY = localY + posY;
+        const globalZ = -localX * sinRy + localZ * cosRy + rz;
+        
+        return new THREE.Vector3(globalX, globalY, globalZ);
+      };
+
+      // Draw sagging 3D patch cables connecting left/right servers to center network switches
+      const drawCable = (pStart, pEnd, cableColor) => {
+        const midPoint = new THREE.Vector3().addVectors(pStart, pEnd).multiplyScalar(0.5);
+        midPoint.y -= 0.22 + Math.random() * 0.12; // Sagging drop
+        midPoint.z += 0.24 + Math.random() * 0.1;   // Loop forward to clear frames
+
+        const curve = new THREE.CatmullRomCurve3([
+          pStart,
+          new THREE.Vector3(pStart.x, pStart.y, pStart.z + 0.06), // exit straight
+          midPoint,
+          new THREE.Vector3(pEnd.x, pEnd.y, pEnd.z + 0.06), // enter straight
+          pEnd
+        ]);
+
+        const tubeGeo = new THREE.TubeGeometry(curve, 24, 0.012, 6, false);
+        const tubeMat = new THREE.MeshStandardMaterial({
+          color: cableColor,
+          metalness: 0.9,
+          roughness: 0.25
+        });
+        const tubeMesh = new THREE.Mesh(tubeGeo, tubeMat);
+        tubeMesh.castShadow = true;
+        tubeMesh.receiveShadow = true;
+        clusterGroup.add(tubeMesh);
+      };
+
+      // Connections list: [fromRack, fromBlade, fromCol, toRack, toBlade, toCol, color]
+      const connections = [
+        [0, 2, 1, 1, 4, 2, 0x00f0ff], // Left Rack Blade 2 -> Center Switch 4 (Blue/Cyan)
+        [0, 6, 2, 1, 4, 5, 0x00f0ff], // Left Rack Blade 6 -> Center Switch 4 (Blue/Cyan)
+        [0, 9, 3, 1, 8, 3, 0xff007f], // Left Rack Blade 9 -> Center Switch 8 (Magenta)
+        
+        [2, 3, 1, 1, 4, 8, 0x00f0ff],  // Right Rack Blade 3 -> Center Switch 4 (Blue/Cyan)
+        [2, 5, 3, 1, 8, 7, 0x00ff66],  // Right Rack Blade 5 -> Center Switch 8 (Green)
+        [2, 8, 2, 1, 8, 10, 0xff007f]  // Right Rack Blade 8 -> Center Switch 8 (Magenta)
+      ];
+
+      connections.forEach(([fR, fB, fC, tR, tB, tC, col]) => {
+        const p1 = getPortGlobalPos(fR, fB, fC);
+        const p2 = getPortGlobalPos(tR, tB, tC);
+        drawCable(p1, p2, col);
+      });
 
       // Base Platform Floor
       const baseGeo = new THREE.BoxGeometry(5.2, 0.12, 2.2);
