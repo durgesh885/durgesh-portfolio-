@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
 
 // Inline SVG Developer Icons Components
 const CodeIcon = () => (
@@ -276,24 +277,24 @@ export default function Home() {
     canvasContainer.appendChild(renderer.domElement);
     canvasContainer.classList.add("webgl-active");
 
-    // Lights Setup (Optimized for realistic glassmorphism and solid metal shading)
-    const ambientLight = new THREE.AmbientLight(0xffffff, isMobile ? 0.65 : 0.85);
+    // Lights Setup (Adjusted for moody cyberpunk metal styling and rich neon highlights)
+    const ambientLight = new THREE.AmbientLight(0xffffff, isMobile ? 0.15 : 0.22);
     scene.add(ambientLight);
 
-    const dirLight = new THREE.DirectionalLight(0xffffff, isMobile ? 1.0 : 2.0);
-    dirLight.position.set(6, 8, 5);
+    const dirLight = new THREE.DirectionalLight(0xffffff, isMobile ? 0.4 : 0.8);
+    dirLight.position.set(5, 7, 4);
     scene.add(dirLight);
 
-    const pointLight1 = new THREE.PointLight(0xff007f, isMobile ? 2.5 : 5.0, 18); // Glowing Magenta
-    pointLight1.position.set(-4, 3.5, 3);
+    const pointLight1 = new THREE.PointLight(0xff007f, isMobile ? 4.0 : 7.0, 20); // Glowing Magenta
+    pointLight1.position.set(-3.5, 3, 2.5);
     scene.add(pointLight1);
 
-    const pointLight2 = new THREE.PointLight(0x00f0ff, isMobile ? 2.5 : 5.0, 18); // Electric Cyan
-    pointLight2.position.set(4, -3.5, 3);
+    const pointLight2 = new THREE.PointLight(0x00f0ff, isMobile ? 4.0 : 7.0, 20); // Electric Cyan
+    pointLight2.position.set(3.5, -3, 2.5);
     scene.add(pointLight2);
 
-    const cursorLight = new THREE.PointLight(0xffaa00, isMobile ? 1.2 : 3.5, 14); // Dynamic Gold Light
-    cursorLight.position.set(0, 0, 4);
+    const cursorLight = new THREE.PointLight(0xffaa00, isMobile ? 2.0 : 4.5, 15); // Dynamic Gold Light
+    cursorLight.position.set(0, 0, 3.5);
     scene.add(cursorLight);
 
     const geometriesToDispose = [];
@@ -302,29 +303,172 @@ export default function Home() {
     const infraGroup = new THREE.Group();
     scene.add(infraGroup);
 
-    
+    // 1. Dynamic terminal screen canvas & texture
+    const screenCanvas = document.createElement("canvas");
+    screenCanvas.width = 512;
+    screenCanvas.height = 340;
+    const screenCtx = screenCanvas.getContext("2d");
+    const screenTexture = new THREE.CanvasTexture(screenCanvas);
+    materialsToDispose.push(screenTexture);
+
+    const termLogs = [
+      "durgesh@aws-ops:~$ npm run deploy",
+      "> durgesh-portfolio@0.1.0 deploy",
+      "> next build && next start",
+      "",
+      "▲ Next.js 16.2.9 (Turbopack)",
+      "- Cloud Provider: AWS (Amazon Web Services)",
+      "- Target Region: us-east-1 (N. Virginia)",
+      "",
+      "[INFO] Creating AWS VPC (10.0.0.0/16)... [OK]",
+      "[INFO] Configuring Internet Gateway... [OK]",
+      "[INFO] Provisioning Public Subnet 1a... [OK]",
+      "[INFO] Setting up Security Groups (SSH, HTTP, HTTPS)... [OK]",
+      "[INFO] Deploying AWS EC2 Ubuntu instance... [OK]",
+      "[INFO] Allocating Elastic IP: 54.210.12.85... [OK]",
+      "[INFO] Attaching EBS Block Storage gp3 (50GB)... [OK]",
+      "[INFO] Connecting via SSH and installing Docker... [OK]",
+      "[INFO] Building Docker container: portfolio:latest... [OK]",
+      "[INFO] Running container on port 80 (nginx reverse proxy)... [OK]",
+      "[INFO] Setting up MongoDB Database container... [OK]",
+      "[INFO] Configuring AWS Route 53 DNS records... [OK]",
+      "[INFO] Mapping domain name durgesh.dev to Route 53... [OK]",
+      "[INFO] Requesting SSL Certificate from Let's Encrypt... [OK]",
+      "[INFO] Generating SSL certs via Certbot... [OK]",
+      "[INFO] HTTPS enabled successfully! SSL cert active.",
+      "",
+      "✓ Compiled successfully in 142ms",
+      "✓ Next.js web application is LIVE & SECURE!",
+      "durgesh@aws-ops:~$ _"
+    ];
+
+    let currentLogIndex = 0;
+    const displayedLogs = [];
+    let lastLogTime = 0;
+
+    const updateTerminal = (time) => {
+      const now = time * 1000;
+      if (now - lastLogTime > 800) {
+        lastLogTime = now;
+        if (currentLogIndex < termLogs.length) {
+          displayedLogs.push(termLogs[currentLogIndex]);
+          currentLogIndex++;
+          if (displayedLogs.length > 15) {
+            displayedLogs.shift();
+          }
+        } else {
+          displayedLogs.length = 0;
+          currentLogIndex = 0;
+        }
+      }
+
+      // Draw dark terminal screen background
+      screenCtx.fillStyle = "#030712";
+      screenCtx.fillRect(0, 0, 512, 340);
+
+      // Draw macOS-style window header
+      screenCtx.fillStyle = "#1f2937";
+      screenCtx.fillRect(0, 0, 512, 32);
+
+      // macOS control buttons
+      screenCtx.fillStyle = "#ef4444";
+      screenCtx.beginPath(); screenCtx.arc(18, 16, 4, 0, Math.PI * 2); screenCtx.fill();
+      screenCtx.fillStyle = "#f59e0b";
+      screenCtx.beginPath(); screenCtx.arc(30, 16, 4, 0, Math.PI * 2); screenCtx.fill();
+      screenCtx.fillStyle = "#10b981";
+      screenCtx.beginPath(); screenCtx.arc(42, 16, 4, 0, Math.PI * 2); screenCtx.fill();
+
+      screenCtx.fillStyle = "#9ca3af";
+      screenCtx.font = "bold 11px monospace";
+      screenCtx.fillText("durgesh@aws-cloud-ops: ~", 64, 20);
+
+      screenCtx.font = "12px monospace";
+      for (let i = 0; i < displayedLogs.length; i++) {
+        const line = displayedLogs[i];
+        let color = "#10b981";
+
+        if (line.startsWith("durgesh@aws-ops")) {
+          color = "#00f0ff";
+        } else if (line.includes("[INFO]")) {
+          color = "#cbd5e1";
+        } else if (line.includes("▲") || line.includes("Next.js")) {
+          color = "#ffffff";
+        } else if (line.includes("✓")) {
+          color = "#00ff66";
+        } else if (line.includes("deploy") || line.includes("build")) {
+          color = "#ff79c6";
+        }
+
+        screenCtx.fillStyle = color;
+        screenCtx.fillText(line, 20, 52 + i * 18);
+      }
+      
+      screenTexture.needsUpdate = true;
+    };
+
     let mixer;
     const clock = new THREE.Clock();
     
-    // Load Actual Heavy-Duty 3D Model (Quantum Server / Cloud Node)
+    // Load MacBook Pro 3D Model with Draco compression support
     const loader = new GLTFLoader();
-    loader.load('/quantum_server.glb', (gltf) => {
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
+    loader.setDRACOLoader(dracoLoader);
+    
+    loader.load('/mac-draco.glb', (gltf) => {
       const model = gltf.scene;
       
-      // Enhance model materials for realistic look
       model.traverse((child) => {
         if (child.isMesh) {
           child.castShadow = true;
           child.receiveShadow = true;
+          
           if (child.material) {
-            child.material.metalness = Math.max(0.7, child.material.metalness || 0);
-            child.material.roughness = Math.min(0.3, child.material.roughness || 1);
+            // Aluminum laptop casing
+            if (child.material.name === 'aluminium') {
+              child.material.color.setHex(0x181a20); // Dark Charcoal/Space Grey
+              child.material.metalness = 0.95;
+              child.material.roughness = 0.2;
+            }
+            
+            // Screen border matte
+            if (child.material.name === 'matte.001') {
+              child.material.color.setHex(0x0a0a0f);
+              child.material.roughness = 0.8;
+            }
+            
+            // Touchbar/trackpad base
+            if (child.material.name === 'trackpad' || child.material.name === 'touchbar') {
+              child.material.color.setHex(0x1f2128);
+              child.material.roughness = 0.4;
+            }
+            
+            // Keyboard keys
+            if (child.material.name === 'keys') {
+              child.material.color.setHex(0x0b0c10);
+              child.material.roughness = 0.6;
+            }
+            
+            // Dynamic AWS/DevOps scrolling code screen
+            if (child.material.name === 'screen.001') {
+              child.material = new THREE.MeshBasicMaterial({
+                map: screenTexture,
+                transparent: false
+              });
+            }
           }
         }
       });
       
-      model.scale.set(0.65, 0.65, 0.65);
-      model.position.set(0, -0.2, 0);
+      // Position the model nicely
+      model.scale.set(0.9, 0.9, 0.9);
+      model.position.set(0, -0.6, 0);
+      
+      // Open the laptop lid
+      const screenFlipNode = model.getObjectByName('screenflip');
+      if (screenFlipNode) {
+        screenFlipNode.rotation.x = -1.15; // Opens lid to face camera
+      }
       
       infraGroup.add(model);
       
@@ -460,12 +604,19 @@ export default function Home() {
         mixer.update(clock.getDelta());
       }
       
-      // Rotate the entire heavy model group slowly
-      infraGroup.rotation.y = time * 0.15;
+      // Update dynamic live coding terminal screen on the MacBook
+      updateTerminal(time);
       
-      // Layout positioning on scroll
-      infraGroup.position.y = targetGroupPos.y + Math.sin(time) * 0.05 - (scrollFactor * 0.18);
-      infraGroup.rotation.y = scrollFactor * 0.08;
+      // Automatic gentle float up and down
+      infraGroup.position.y = targetGroupPos.y + Math.sin(time * 0.8) * 0.06 - (scrollFactor * 0.18);
+      
+      // Multi-axis mouse-responsive parallax tilting and slow breathing wobble (always facing user)
+      const targetRotationY = 0.45 + mouseX * 0.5 + Math.sin(time * 0.4) * 0.08 + (scrollFactor * 0.12);
+      const targetRotationX = 0.15 - mouseY * 0.3 + Math.cos(time * 0.4) * 0.04;
+      
+      // Smooth interpolation for rotational responsiveness
+      infraGroup.rotation.y += (targetRotationY - infraGroup.rotation.y) * 0.08;
+      infraGroup.rotation.x += (targetRotationX - infraGroup.rotation.x) * 0.08;
 
       // Stars floating
       const starsArr = particlesGeometry.attributes.position.array;
