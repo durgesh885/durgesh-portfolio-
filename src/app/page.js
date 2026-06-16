@@ -409,76 +409,408 @@ export default function Home() {
     let mixer;
     const clock = new THREE.Clock();
     
-    // Load MacBook Pro 3D Model with Draco compression support
+    let blinkingLeds = [];
+    let fanGroups = [];
+
+    const createDataCenterCluster = () => {
+      const clusterGroup = new THREE.Group();
+
+      const colorCabinet = 0x0c0d10; // Opaque deep dark metal casing
+      const colorCabinetEdge = 0x22252e; // Gunmetal frame borders
+      const colorBlade = 0x14161b; // Charcoal server faceplates
+      const colorHandle = 0xa0a5b0; // Chrome rack handles
+      const colorLedGreen = 0x00ff66;
+      const colorLedCyan = 0x00f0ff;
+      const colorLedMagenta = 0xff007f;
+      const colorLedOrange = 0xffaa00;
+
+      const rackCount = 3;
+      const rackSpacing = 1.7;
+      const leds = [];
+      const fans = [];
+
+      for (let r = 0; r < rackCount; r++) {
+        const rackGroup = new THREE.Group();
+        const posX = (r - 1) * rackSpacing;
+        const posZ = r === 1 ? 0 : -0.25;
+        const rotY = r === 0 ? 0.12 : r === 2 ? -0.12 : 0;
+        rackGroup.position.set(posX, 0, posZ);
+        rackGroup.rotation.y = rotY;
+
+        // 1. Solid Outer Cabinet Casing (Back, sides, top, bottom)
+        const shellGeo = new THREE.BoxGeometry(1.45, 3.7, 1.5);
+        const shellMat = new THREE.MeshStandardMaterial({
+          color: colorCabinet,
+          metalness: 0.9,
+          roughness: 0.25,
+          side: THREE.DoubleSide
+        });
+        const shell = new THREE.Mesh(shellGeo, shellMat);
+        shell.castShadow = true;
+        shell.receiveShadow = true;
+        rackGroup.add(shell);
+
+        // Frame borders for the front opening to give depth
+        const frameMat = new THREE.MeshStandardMaterial({
+          color: colorCabinetEdge,
+          metalness: 0.95,
+          roughness: 0.18
+        });
+
+        const frameLeft = new THREE.Mesh(new THREE.BoxGeometry(0.05, 3.7, 0.08), frameMat);
+        frameLeft.position.set(-0.7, 0, 0.75);
+        rackGroup.add(frameLeft);
+
+        const frameRight = frameLeft.clone();
+        frameRight.position.x = 0.7;
+        rackGroup.add(frameRight);
+
+        const frameTop = new THREE.Mesh(new THREE.BoxGeometry(1.45, 0.05, 0.08), frameMat);
+        frameTop.position.set(0, 1.825, 0.75);
+        rackGroup.add(frameTop);
+
+        const frameBottom = frameTop.clone();
+        frameBottom.position.y = -1.825;
+        rackGroup.add(frameBottom);
+
+        // 2. Stack of Server Blades
+        const bladeCount = 11;
+        const startY = -1.5;
+        const spacingY = 0.3;
+
+        for (let b = 0; b < bladeCount; b++) {
+          const bladeGroup = new THREE.Group();
+          bladeGroup.position.y = startY + b * spacingY;
+
+          // Metal faceplate
+          const faceGeo = new THREE.BoxGeometry(1.34, 0.23, 0.08);
+          const faceMat = new THREE.MeshStandardMaterial({
+            color: colorBlade,
+            metalness: 0.95,
+            roughness: 0.18
+          });
+          const faceplate = new THREE.Mesh(faceGeo, faceMat);
+          faceplate.position.set(0, 0, 0.71);
+          faceplate.castShadow = true;
+          faceplate.receiveShadow = true;
+          bladeGroup.add(faceplate);
+
+          // Horizontal/Vertical handles
+          const handleGeo = new THREE.CylinderGeometry(0.012, 0.012, 0.15, 8);
+          const handleMat = new THREE.MeshStandardMaterial({
+            color: colorHandle,
+            metalness: 0.98,
+            roughness: 0.05
+          });
+          
+          const handleL = new THREE.Mesh(handleGeo, handleMat);
+          handleL.position.set(-0.61, 0, 0.76);
+          bladeGroup.add(handleL);
+
+          const handleR = handleL.clone();
+          handleR.position.x = 0.61;
+          bladeGroup.add(handleR);
+
+          // Corner screws
+          const screwGeo = new THREE.CylinderGeometry(0.014, 0.014, 0.01, 8);
+          screwGeo.rotateX(Math.PI / 2);
+          const screwMat = new THREE.MeshStandardMaterial({
+            color: 0x484b54,
+            metalness: 0.9,
+            roughness: 0.3
+          });
+          const screwPositions = [
+            [-0.64, 0.08], [-0.64, -0.08],
+            [0.64, 0.08], [0.64, -0.08]
+          ];
+          screwPositions.forEach(([sx, sy]) => {
+            const screw = new THREE.Mesh(screwGeo, screwMat);
+            screw.position.set(sx, sy, 0.752);
+            bladeGroup.add(screw);
+          });
+
+          // Layout-specific blades: switches, server blades, and monitors
+          const isSwitch = b === 4 || b === 8;
+          const isMonitor = r === 1 && b === 6; // Center rack middle slot has console monitor screen
+
+          if (isMonitor) {
+            // Screen container
+            const screenFrameGeo = new THREE.BoxGeometry(0.9, 0.18, 0.02);
+            const screenFrameMat = new THREE.MeshStandardMaterial({
+              color: 0x08090a,
+              metalness: 0.3,
+              roughness: 0.8
+            });
+            const screenFrame = new THREE.Mesh(screenFrameGeo, screenFrameMat);
+            screenFrame.position.set(-0.1, 0, 0.752);
+            bladeGroup.add(screenFrame);
+
+            // Active terminal screen
+            const screenMeshGeo = new THREE.BoxGeometry(0.86, 0.15, 0.01);
+            const screenMeshMat = new THREE.MeshBasicMaterial({
+              map: screenTexture,
+              transparent: false
+            });
+            const screenMesh = new THREE.Mesh(screenMeshGeo, screenMeshMat);
+            screenMesh.position.set(-0.1, 0, 0.763);
+            bladeGroup.add(screenMesh);
+
+            // Dial dials/buttons on the right
+            const dialGeo = new THREE.CylinderGeometry(0.012, 0.012, 0.01, 8);
+            dialGeo.rotateX(Math.PI / 2);
+            const dialMat = new THREE.MeshStandardMaterial({ color: 0x5a5f6e, metalness: 0.9, roughness: 0.1 });
+            
+            for (let btn = 0; btn < 3; btn++) {
+              const dial = new THREE.Mesh(dialGeo, dialMat);
+              dial.position.set(0.42 + btn * 0.06, 0, 0.752);
+              bladeGroup.add(dial);
+            }
+          } else if (isSwitch) {
+            // Switch network ports
+            const portGeo = new THREE.BoxGeometry(0.045, 0.035, 0.02);
+            const portMat = new THREE.MeshStandardMaterial({
+              color: 0x050607,
+              metalness: 0.1,
+              roughness: 0.9
+            });
+            
+            for (let row = 0; row < 2; row++) {
+              for (let col = 0; col < 12; col++) {
+                const port = new THREE.Mesh(portGeo, portMat);
+                const px = -0.44 + col * 0.08;
+                const py = -0.045 + row * 0.09;
+                port.position.set(px, py, 0.752);
+                bladeGroup.add(port);
+                
+                // Port activity LED
+                const actOn = Math.random() > 0.45;
+                const actColor = Math.random() > 0.6 ? colorLedGreen : colorLedOrange;
+                const pLedGeo = new THREE.BoxGeometry(0.01, 0.01, 0.01);
+                const pLedMat = new THREE.MeshStandardMaterial({
+                  color: 0x000000,
+                  emissive: actColor,
+                  emissiveIntensity: actOn ? 2.0 : 0.1
+                });
+                const pLed = new THREE.Mesh(pLedGeo, pLedMat);
+                pLed.position.set(px, py + 0.024, 0.758);
+                bladeGroup.add(pLed);
+                
+                if (actOn) {
+                  leds.push({
+                    mesh: pLed,
+                    baseColor: actColor,
+                    speed: 0.06 + Math.random() * 0.14,
+                    offset: Math.random() * Math.PI
+                  });
+                }
+              }
+            }
+          } else {
+            // Standard Server Blade: Disk bay slots
+            const bayGeo = new THREE.BoxGeometry(0.18, 0.15, 0.02);
+            const bayMat = new THREE.MeshStandardMaterial({
+              color: 0x090a0c,
+              metalness: 0.4,
+              roughness: 0.6
+            });
+
+            for (let d = 0; d < 4; d++) {
+              const bay = new THREE.Mesh(bayGeo, bayMat);
+              bay.position.set(-0.35 + d * 0.22, 0, 0.752);
+              bladeGroup.add(bay);
+
+              // Latch eject handle
+              const latch = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.09, 0.01), handleMat);
+              latch.position.set(-0.42 + d * 0.22, 0, 0.763);
+              bladeGroup.add(latch);
+            }
+
+            // Standard Blade status indicators (Power, Disk, Network)
+            const ledPositions = [0.46, 0.51, 0.56];
+            const ledColors = [colorLedGreen, colorLedCyan, colorLedMagenta];
+            ledPositions.forEach((lx, idx) => {
+              const ledGeo = new THREE.SphereGeometry(0.015, 8, 8);
+              const ledMat = new THREE.MeshStandardMaterial({
+                color: 0x111111,
+                emissive: ledColors[idx],
+                emissiveIntensity: Math.random() > 0.35 ? 2.5 : 0.1
+              });
+              const led = new THREE.Mesh(ledGeo, ledMat);
+              led.position.set(lx, 0.04, 0.755);
+              bladeGroup.add(led);
+              
+              leds.push({
+                mesh: led,
+                baseColor: ledColors[idx],
+                speed: 0.08 + Math.random() * 0.16,
+                offset: Math.random() * Math.PI
+              });
+            });
+          }
+
+          rackGroup.add(bladeGroup);
+        }
+
+        // Side neon glowing bars
+        const glowL = new THREE.Mesh(
+          new THREE.BoxGeometry(0.012, 3.5, 0.012),
+          new THREE.MeshBasicMaterial({ color: colorLedCyan })
+        );
+        glowL.position.set(-0.66, 0, 0.74);
+        rackGroup.add(glowL);
+
+        const glowR = new THREE.Mesh(
+          new THREE.BoxGeometry(0.012, 3.5, 0.012),
+          new THREE.MeshBasicMaterial({ color: colorLedMagenta })
+        );
+        glowR.position.set(0.66, 0, 0.74);
+        rackGroup.add(glowR);
+
+        // Rear cooling fans
+        const rearFanGroup = new THREE.Group();
+        rearFanGroup.position.set(0, 0, -0.76);
+        for (let f = 0; f < 3; f++) {
+          const fanBack = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.2, 0.2, 0.02, 16),
+            new THREE.MeshStandardMaterial({ color: 0x1b1d22, metalness: 0.85, roughness: 0.3 })
+          );
+          fanBack.rotation.x = Math.PI / 2;
+          fanBack.position.y = -0.9 + f * 0.9;
+          rearFanGroup.add(fanBack);
+          
+          const bladeGeo = new THREE.BoxGeometry(0.36, 0.03, 0.01);
+          const bladeMat = new THREE.MeshStandardMaterial({ color: 0x060708, metalness: 0.9, roughness: 0.1 });
+          const blades = new THREE.Group();
+          blades.position.copy(fanBack.position);
+          
+          const b1 = new THREE.Mesh(bladeGeo, bladeMat);
+          blades.add(b1);
+          const b2 = b1.clone();
+          b2.rotation.z = Math.PI / 2;
+          blades.add(b2);
+          
+          rearFanGroup.add(blades);
+          fans.push(blades);
+        }
+        rackGroup.add(rearFanGroup);
+
+        clusterGroup.add(rackGroup);
+      }
+
+      // Base Platform Floor
+      const baseGeo = new THREE.BoxGeometry(5.2, 0.12, 2.2);
+      const baseMat = new THREE.MeshStandardMaterial({
+        color: 0x090a0d,
+        metalness: 0.9,
+        roughness: 0.35
+      });
+      const baseFloor = new THREE.Mesh(baseGeo, baseMat);
+      baseFloor.position.y = -1.86;
+      baseFloor.receiveShadow = true;
+      clusterGroup.add(baseFloor);
+
+      // Floor grid plates
+      const plateGeo = new THREE.BoxGeometry(1.5, 0.01, 1.8);
+      const plateMat = new THREE.MeshStandardMaterial({
+        color: 0x16181f,
+        metalness: 0.95,
+        roughness: 0.2
+      });
+      for (let p = 0; p < rackCount; p++) {
+        const plate = new THREE.Mesh(plateGeo, plateMat);
+        plate.position.set((p - 1) * rackSpacing, -1.79, 0);
+        clusterGroup.add(plate);
+      }
+
+      return { group: clusterGroup, leds, fans };
+    };
+
+    // Load MacBook Pro or custom server model with fallback support
     const loader = new GLTFLoader();
     const dracoLoader = new DRACOLoader();
     dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
     loader.setDRACOLoader(dracoLoader);
-    
-    loader.load('/mac-draco.glb', (gltf) => {
-      const model = gltf.scene;
+
+    const loadProceduralServerRack = () => {
+      // Clear any previous model in infraGroup
+      while(infraGroup.children.length > 0) { 
+        infraGroup.remove(infraGroup.children[0]); 
+      }
       
-      model.traverse((child) => {
-        if (child.isMesh) {
-          child.castShadow = true;
-          child.receiveShadow = true;
+      const { group, leds, fans } = createDataCenterCluster();
+      blinkingLeds = leds;
+      fanGroups = fans;
+      
+      // Position the cluster nicely
+      group.position.set(0, 0, 0);
+      infraGroup.scale.set(1.0, 1.0, 1.0); // Reset scale
+      infraGroup.add(group);
+    };
+
+    const loadModel = (modelPath) => {
+      loader.load(
+        modelPath,
+        (gltf) => {
+          const model = gltf.scene;
           
-          if (child.material) {
-            // Aluminum laptop casing
-            if (child.material.name === 'aluminium') {
-              child.material.color.setHex(0x181a20); // Dark Charcoal/Space Grey
-              child.material.metalness = 0.95;
-              child.material.roughness = 0.2;
-            }
-            
-            // Screen border matte
-            if (child.material.name === 'matte.001') {
-              child.material.color.setHex(0x0a0a0f);
-              child.material.roughness = 0.8;
-            }
-            
-            // Touchbar/trackpad base
-            if (child.material.name === 'trackpad' || child.material.name === 'touchbar') {
-              child.material.color.setHex(0x1f2128);
-              child.material.roughness = 0.4;
-            }
-            
-            // Keyboard keys
-            if (child.material.name === 'keys') {
-              child.material.color.setHex(0x0b0c10);
-              child.material.roughness = 0.6;
-            }
-            
-            // Dynamic AWS/DevOps scrolling code screen
-            if (child.material.name === 'screen.001') {
-              child.material = new THREE.MeshBasicMaterial({
-                map: screenTexture,
-                transparent: false
-              });
-            }
+          // Clear any previous model in infraGroup
+          while(infraGroup.children.length > 0) { 
+            infraGroup.remove(infraGroup.children[0]); 
           }
+          blinkingLeds = [];
+          fanGroups = [];
+          
+          // Apply standard dark styling to custom server model
+          model.traverse((child) => {
+            if (child.isMesh) {
+              child.castShadow = true;
+              child.receiveShadow = true;
+              if (child.material) {
+                const materials = Array.isArray(child.material) ? child.material : [child.material];
+                materials.forEach((mat) => {
+                  if (mat) {
+                    if ('metalness' in mat) {
+                      mat.metalness = Math.max(0.7, mat.metalness !== undefined ? mat.metalness : 0);
+                    }
+                    if ('roughness' in mat) {
+                      mat.roughness = Math.min(0.3, mat.roughness !== undefined ? mat.roughness : 1);
+                    }
+                  }
+                });
+              }
+            }
+          });
+          
+          // Automatic bounding box scaling and centering for custom server model
+          const box = new THREE.Box3().setFromObject(model);
+          const center = new THREE.Vector3();
+          box.getCenter(center);
+          const size = box.getSize(new THREE.Vector3());
+          
+          const maxDim = Math.max(size.x, size.y, size.z);
+          const scale = isMobile ? 3.0 / maxDim : 4.5 / maxDim;
+          
+          model.position.sub(center); 
+          infraGroup.scale.set(scale, scale, scale);
+          infraGroup.add(model);
+
+          if (gltf.animations && gltf.animations.length) {
+            mixer = new THREE.AnimationMixer(model);
+            gltf.animations.forEach((clip) => {
+              mixer.clipAction(clip).play();
+            });
+          }
+        },
+        undefined,
+        (error) => {
+          console.warn(`Custom model ${modelPath} not found. Loading high-fidelity procedural Server Cluster.`);
+          loadProceduralServerRack();
         }
-      });
-      
-      // Position the model nicely
-      model.scale.set(0.9, 0.9, 0.9);
-      model.position.set(0, -0.6, 0);
-      
-      // Open the laptop lid
-      const screenFlipNode = model.getObjectByName('screenflip');
-      if (screenFlipNode) {
-        screenFlipNode.rotation.x = -1.15; // Opens lid to face camera
-      }
-      
-      infraGroup.add(model);
-      
-      if (gltf.animations && gltf.animations.length) {
-        mixer = new THREE.AnimationMixer(model);
-        gltf.animations.forEach((clip) => {
-          mixer.clipAction(clip).play();
-        });
-      }
-    });
+      );
+    };
+
+    // Load custom model if available, otherwise fall back to procedural Server Cluster
+    loadModel("/server.glb");
 
     // 5. Nebula Ambient Dust Particles
     const particlesGeometry = new THREE.BufferGeometry();
@@ -604,8 +936,21 @@ export default function Home() {
         mixer.update(clock.getDelta());
       }
       
-      // Update dynamic live coding terminal screen on the MacBook
+      // Update dynamic live coding terminal screen on the rack console
       updateTerminal(time);
+
+      // Blinking LEDs animation
+      blinkingLeds.forEach((led) => {
+        if (led.mesh && led.mesh.material) {
+          const intensity = Math.sin(time * led.speed * 12 + led.offset);
+          led.mesh.material.emissiveIntensity = intensity > 0.25 ? 2.8 : 0.1;
+        }
+      });
+
+      // Rotating cooling fans animation
+      fanGroups.forEach((fan) => {
+        fan.rotation.z += 0.15;
+      });
       
       // Automatic gentle float up and down
       infraGroup.position.y = targetGroupPos.y + Math.sin(time * 0.8) * 0.06 - (scrollFactor * 0.18);
