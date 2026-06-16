@@ -268,25 +268,26 @@ export default function Home() {
     }
 
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.8));
+    const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(isMobile ? 1.0 : Math.min(window.devicePixelRatio, 1.8)); // Buttery smooth mobile performance
     canvasContainer.appendChild(renderer.domElement);
     canvasContainer.classList.add("webgl-active");
 
-    const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
-
-    // Lights (optimized/dimmed on mobile to improve content readability)
-    const ambientLight = new THREE.AmbientLight(0xffffff, isMobile ? 0.35 : 0.72);
+    // Lights
+    const ambientLight = new THREE.AmbientLight(0xffffff, isMobile ? 0.45 : 0.72);
     scene.add(ambientLight);
 
-    const directionalLight1 = new THREE.DirectionalLight(0x00f0ff, isMobile ? 0.8 : 1.8);
+    const directionalLight1 = new THREE.DirectionalLight(0x00f0ff, isMobile ? 1.0 : 1.8);
     directionalLight1.position.set(5, 7, 6);
     scene.add(directionalLight1);
 
-    const pointLight = new THREE.PointLight(0x0055ff, isMobile ? 1.5 : 3.2, 48);
+    const pointLight = new THREE.PointLight(0x0055ff, isMobile ? 1.8 : 3.2, 48);
     pointLight.position.set(-3.5, 2.5, 2);
     scene.add(pointLight);
 
-    const pointLight2 = new THREE.PointLight(0x00ffd2, isMobile ? 1.0 : 2.2, 34);
+    const pointLight2 = new THREE.PointLight(0xff007f, isMobile ? 1.5 : 2.5, 34); // Neon pink ambient light
     pointLight2.position.set(4, -1.5, 3);
     scene.add(pointLight2);
 
@@ -296,44 +297,71 @@ export default function Home() {
     const infraGroup = new THREE.Group();
     scene.add(infraGroup);
 
-    // Inner Core (Representing AWS database/gateway)
+    // Inner Core (Representing database/quantum node with dynamic shifting colors)
     const coreGeometry = new THREE.IcosahedronGeometry(0.55, 1);
     geometriesToDispose.push(coreGeometry);
     const coreMaterial = new THREE.MeshBasicMaterial({
       color: 0x00f0ff,
       wireframe: true,
       transparent: true,
-      opacity: isMobile ? 0.45 : 0.65,
+      opacity: isMobile ? 0.55 : 0.75,
       blending: THREE.AdditiveBlending
     });
     materialsToDispose.push(coreMaterial);
     const coreMesh = new THREE.Mesh(coreGeometry, coreMaterial);
     infraGroup.add(coreMesh);
 
-    // Middle Globe (Representing global network routing wireframe)
-    const globeGeometry = new THREE.SphereGeometry(1.5, 15, 15);
-    geometriesToDispose.push(globeGeometry);
-    const globeMaterial = new THREE.MeshBasicMaterial({
-      color: 0x0066ff,
-      wireframe: true,
+    // Concentric Neon Orbiting Rings (Colorful gyroscopic elements)
+    // Ring 1: Neon Cyan
+    const ringGeom1 = new THREE.TorusGeometry(1.3, 0.015, 8, 48);
+    geometriesToDispose.push(ringGeom1);
+    const ringMat1 = new THREE.MeshBasicMaterial({
+      color: 0x00f0ff,
       transparent: true,
-      opacity: isMobile ? 0.22 : 0.35,
+      opacity: isMobile ? 0.35 : 0.6,
       blending: THREE.AdditiveBlending
     });
-    materialsToDispose.push(globeMaterial);
-    const globeMesh = new THREE.Mesh(globeGeometry, globeMaterial);
-    infraGroup.add(globeMesh);
+    materialsToDispose.push(ringMat1);
+    const ringMesh1 = new THREE.Mesh(ringGeom1, ringMat1);
+    ringMesh1.rotation.x = Math.PI / 2.2;
+    infraGroup.add(ringMesh1);
+
+    // Ring 2: Neon Pink/Magenta
+    const ringGeom2 = new THREE.TorusGeometry(1.65, 0.015, 8, 48);
+    geometriesToDispose.push(ringGeom2);
+    const ringMat2 = new THREE.MeshBasicMaterial({
+      color: 0xff007f,
+      transparent: true,
+      opacity: isMobile ? 0.35 : 0.55,
+      blending: THREE.AdditiveBlending
+    });
+    materialsToDispose.push(ringMat2);
+    const ringMesh2 = new THREE.Mesh(ringGeom2, ringMat2);
+    ringMesh2.rotation.y = Math.PI / 4;
+    infraGroup.add(ringMesh2);
+
+    // Ring 3: Neon Teal/Green
+    const ringGeom3 = new THREE.TorusGeometry(2.0, 0.015, 8, 48);
+    geometriesToDispose.push(ringGeom3);
+    const ringMat3 = new THREE.MeshBasicMaterial({
+      color: 0x00ffd2,
+      transparent: true,
+      opacity: isMobile ? 0.3 : 0.5,
+      blending: THREE.AdditiveBlending
+    });
+    materialsToDispose.push(ringMat3);
+    const ringMesh3 = new THREE.Mesh(ringGeom3, ringMat3);
+    ringMesh3.rotation.x = -Math.PI / 3.8;
+    infraGroup.add(ringMesh3);
 
     // Outer Orbiting Data Ring
     const ringGroup = new THREE.Group();
-    ringGroup.rotation.x = 0.55; // Tilt ring for 3D perspective
-    ringGroup.rotation.z = 0.2;
     infraGroup.add(ringGroup);
 
-    const particleCount = isMobile ? 24 : 48;
+    const particleCount = isMobile ? 16 : 36; // Reduced count to prevent mobile GPU lag
     const ringPositions = new Float32Array(particleCount * 3);
-    const linePositions = new Float32Array(particleCount * 2 * 3); // Radial spokes to center
-    const radius = 2.45;
+    const linePositions = new Float32Array(particleCount * 2 * 3); // Radial spokes
+    const radius = 2.4;
 
     for (let i = 0; i < particleCount; i++) {
       const angle = (i / particleCount) * Math.PI * 2;
@@ -378,10 +406,10 @@ export default function Home() {
     materialsToDispose.push(pointTexture);
 
     const ringMaterial = new THREE.PointsMaterial({
-      size: isMobile ? 0.16 : 0.22,
+      size: isMobile ? 0.14 : 0.2;
       map: pointTexture,
       transparent: true,
-      opacity: isMobile ? 0.65 : 0.85,
+      opacity: isMobile ? 0.6 : 0.8,
       blending: THREE.AdditiveBlending,
       depthWrite: false
     });
@@ -396,9 +424,9 @@ export default function Home() {
     geometriesToDispose.push(lineGeometry);
 
     const lineMaterial = new THREE.LineBasicMaterial({
-      color: 0x00ffd2,
+      color: 0xff007f, // Neon Pink lines connecting core to particles
       transparent: true,
-      opacity: isMobile ? 0.16 : 0.28,
+      opacity: isMobile ? 0.15 : 0.25,
       blending: THREE.AdditiveBlending
     });
     materialsToDispose.push(lineMaterial);
@@ -406,10 +434,10 @@ export default function Home() {
     const lineMesh = new THREE.LineSegments(lineGeometry, lineMaterial);
     ringGroup.add(lineMesh);
 
-    const gridHelper = new THREE.GridHelper(48, 42, 0x00f0ff, 0x090d16);
+    const gridHelper = new THREE.GridHelper(48, isMobile ? 20 : 40, 0x00f0ff, 0x090d16);
     gridHelper.position.y = -3.8;
     gridHelper.position.z = -2;
-    gridHelper.material.opacity = 0.14;
+    gridHelper.material.opacity = 0.12;
     gridHelper.material.transparent = true;
     scene.add(gridHelper);
 
@@ -463,8 +491,8 @@ export default function Home() {
 
     const checkModelVisibility = () => {
       if (window.innerWidth < 968) {
-        targetGroupPos.set(0, 1.15, -3.15);
-        infraGroup.scale.set(0.68, 0.68, 0.68);
+        targetGroupPos.set(0, -1.8, -2.8); // Shifted down on mobile to clear text layout space
+        infraGroup.scale.set(0.64, 0.64, 0.64);
       } else {
         targetGroupPos.set(4.25, 0.25, -1.35);
         infraGroup.scale.set(1.08, 1.08, 1.08);
@@ -497,7 +525,12 @@ export default function Home() {
       camera.position.x += (targetX - camera.position.x) * 0.04;
       camera.position.y += (-targetY - camera.position.y) * 0.04;
       
-      camera.lookAt(targetGroupPos.x - (window.innerWidth < 968 ? 0 : 2.4), targetGroupPos.y, targetGroupPos.z);
+      // Look slightly higher on mobile to place the translated model in the lower part of the screen
+      camera.lookAt(
+        window.innerWidth < 968 ? 0 : targetGroupPos.x - 2.4, 
+        window.innerWidth < 968 ? -0.4 : targetGroupPos.y, 
+        targetGroupPos.z
+      );
 
       // Scroll interpolation
       const currentScroll = scrollRef.current;
@@ -505,14 +538,23 @@ export default function Home() {
       const scrollFactor = targetScrollY * 0.0006;
 
       const time = Date.now() * 0.001;
-      // Rotate Cyber-Core components
-      globeMesh.rotation.y += 0.0018;
-      globeMesh.rotation.x += 0.0008;
 
-      ringGroup.rotation.y += 0.0045;
+      // Dynamic HSL shift for the core color to make it vibrant and colourful!
+      const hue = (time * 0.035) % 1;
+      coreMaterial.color.setHSL(hue, 0.95, 0.55);
 
-      coreMesh.rotation.y -= 0.003;
-      coreMesh.rotation.x -= 0.001;
+      // Rotate core
+      coreMesh.rotation.y -= 0.0025;
+      coreMesh.rotation.x -= 0.0008;
+
+      // Rotate concentric neon rings (gyroscopic motion)
+      ringMesh1.rotation.z += 0.0015;
+      ringMesh2.rotation.x += 0.002;
+      ringMesh2.rotation.y += 0.0008;
+      ringMesh3.rotation.y -= 0.0015;
+      ringMesh3.rotation.z += 0.0008;
+
+      ringGroup.rotation.y += 0.003;
 
       // Layout positioning
       infraGroup.position.y = targetGroupPos.y + Math.sin(time) * 0.1 - (scrollFactor * 0.18);
@@ -1000,13 +1042,13 @@ export default function Home() {
           <div className="about-container reveal">
             <div className="about-content">
               <p className="about-text">
-                I am <strong>Durgesh Chaudhari</strong>, currently pursuing my <strong>Master of Computer Applications (MCA)</strong>. I am passionate about Cloud Architectures, automated deployments, Linux systems, and DevOps engineering.
+                I am <strong>Durgesh Chaudhari</strong>, an aspiring Cloud Engineer currently pursuing my <strong>Master of Computer Applications (MCA)</strong>. I focus on building highly scalable system architectures, automating deployments, and administering Linux servers.
               </p>
               <p className="about-text">
-                My software journey began with standard web development. As I built and integrated backend APIs, I became intrigued by <em>where</em> and <em>how</em> code runs. This led me straight into <strong>AWS Cloud Computing</strong> and the principles of <strong>DevOps automation</strong>.
+                My tech journey started with full-stack web development. Understanding backend API routing triggered my curiosity about hosting environments. This led me to master <strong>AWS Cloud Services</strong> and implement modern <strong>DevOps Pipelines</strong>.
               </p>
               <p className="about-text">
-                I believe in <strong>Infrastructure as Code</strong> and hands-on system building. Deploying portfolio items, configuring SSL certificates, managing DNS entries on Route53, and configuring web server proxies are steps towards my goal of architecting highly available systems.
+                I am a strong advocate of <strong>Infrastructure as Code</strong> and hands-on laboratory setups. Configuring secure web servers, setting up SSL certificates, managing AWS Route 53 zones, and automating deployment loops are steps toward my goal of designing resilient cloud environments.
               </p>
               
               <div className="education-timeline">
@@ -1017,7 +1059,7 @@ export default function Home() {
                     <div className="timeline-dot"></div>
                     <div className="timeline-header">
                       <h3>Master of Computer Applications (MCA)</h3>
-                      <span className="timeline-date">2024 – Present</span>
+                      <span className="timeline-date">2025 – Present</span>
                     </div>
                     <p className="timeline-sub">Currently Pursuing</p>
                     <ul className="timeline-details">
@@ -1030,7 +1072,7 @@ export default function Home() {
                     <div className="timeline-dot"></div>
                     <div className="timeline-header">
                       <h3>Bachelor of Computer Applications (BCA)</h3>
-                      <span className="timeline-date">2021 – 2024</span>
+                      <span className="timeline-date">2022 – 2025</span>
                     </div>
                     <p className="timeline-sub">Completed</p>
                     <ul className="timeline-details">

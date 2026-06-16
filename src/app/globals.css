@@ -963,8 +963,12 @@ section {
 }
 
 .about-text strong {
-    color: var(--primary);
-    font-weight: 600;
+    color: var(--primary); /* Fallback */
+    background: linear-gradient(135deg, var(--primary) 20%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 700;
 }
 
 .education-grid {
