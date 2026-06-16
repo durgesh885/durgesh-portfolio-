@@ -297,176 +297,225 @@ export default function Home() {
     const infraGroup = new THREE.Group();
     scene.add(infraGroup);
 
-    // Inner Core (Representing database/quantum node with dynamic shifting colors)
-    const coreGeometry = new THREE.IcosahedronGeometry(0.55, 1);
+    // 1. Quantum Mainframe Core (Glass Refracting Octahedron)
+    const coreGeometry = new THREE.OctahedronGeometry(0.65, 1);
     geometriesToDispose.push(coreGeometry);
-    const coreMaterial = new THREE.MeshBasicMaterial({
+    const coreMaterial = new THREE.MeshPhysicalMaterial({
       color: 0x00f0ff,
-      wireframe: true,
+      emissive: 0x052e3d,
+      roughness: 0.1,
+      metalness: 0.9,
+      transmission: 0.75, // Glass transparency
+      thickness: 1.2,
       transparent: true,
-      opacity: isMobile ? 0.55 : 0.75,
-      blending: THREE.AdditiveBlending
+      opacity: 0.85,
+      flatShading: true,
+      clearcoat: 1.0,
+      clearcoatRoughness: 0.1
     });
     materialsToDispose.push(coreMaterial);
     const coreMesh = new THREE.Mesh(coreGeometry, coreMaterial);
     infraGroup.add(coreMesh);
 
-    // Concentric Neon Orbiting Rings (Colorful gyroscopic elements)
-    // Ring 1: Neon Cyan
-    const ringGeom1 = new THREE.TorusGeometry(1.3, 0.015, 8, 48);
+    // Inner Glowing Fusion Core (Shining from inside the glass octahedron)
+    const innerCoreGeom = new THREE.SphereGeometry(0.24, 16, 16);
+    geometriesToDispose.push(innerCoreGeom);
+    const innerCoreMat = new THREE.MeshBasicMaterial({
+      color: 0xff007f, // Neon Pink hot core
+      transparent: true,
+      opacity: 0.95
+    });
+    materialsToDispose.push(innerCoreMat);
+    const innerCoreMesh = new THREE.Mesh(innerCoreGeom, innerCoreMat);
+    infraGroup.add(innerCoreMesh);
+
+    // 2. Orbiting Cloud Server Nodes (Glass-like floating cubes with colorful wireframe borders)
+    const nodesGroup = new THREE.Group();
+    infraGroup.add(nodesGroup);
+
+    const nodes = [];
+    const nodeCount = isMobile ? 4 : 6;
+    const nodeColors = [0x00f0ff, 0xff007f, 0x00ffd2, 0xffaa00, 0xbd00ff, 0xff0055];
+
+    // Shared geometry for server nodes
+    const nodeGeom = new THREE.BoxGeometry(0.34, 0.46, 0.18);
+    geometriesToDispose.push(nodeGeom);
+    const edgeGeom = new THREE.BoxGeometry(0.35, 0.47, 0.19);
+    geometriesToDispose.push(edgeGeom);
+
+    for (let i = 0; i < nodeCount; i++) {
+      const nodeContainer = new THREE.Group();
+
+      const nodeMat = new THREE.MeshStandardMaterial({
+        color: 0x090d16,
+        roughness: 0.15,
+        metalness: 0.9,
+        transparent: true,
+        opacity: 0.9
+      });
+      if (i === 0) materialsToDispose.push(nodeMat);
+
+      const nodeMesh = new THREE.Mesh(nodeGeom, nodeMat);
+      nodeContainer.add(nodeMesh);
+
+      const edgeMat = new THREE.MeshBasicMaterial({
+        color: nodeColors[i % nodeColors.length],
+        wireframe: true,
+        transparent: true,
+        opacity: 0.8,
+        blending: THREE.AdditiveBlending
+      });
+      materialsToDispose.push(edgeMat);
+
+      const edgeMesh = new THREE.Mesh(edgeGeom, edgeMat);
+      nodeContainer.add(edgeMesh);
+
+      // Set orbit parameters
+      const angle = (i / nodeCount) * Math.PI * 2;
+      const orbitRadius = 1.7 + i * 0.22;
+      const orbitSpeed = 0.3 + (nodeCount - i) * 0.12;
+      const floatOffset = Math.random() * Math.PI * 2;
+
+      nodeContainer.position.set(
+        Math.cos(angle) * orbitRadius,
+        (Math.random() - 0.5) * 0.6,
+        Math.sin(angle) * orbitRadius
+      );
+      nodesGroup.add(nodeContainer);
+
+      nodes.push({
+        container: nodeContainer,
+        mesh: nodeMesh,
+        edge: edgeMesh,
+        radius: orbitRadius,
+        speed: orbitSpeed,
+        angle: angle,
+        floatOffset: floatOffset,
+        initialY: nodeContainer.position.y
+      });
+    }
+
+    // 3. Glowing Orbital Track Rings
+    const ringGeom1 = new THREE.TorusGeometry(1.4, 0.012, 8, 64);
     geometriesToDispose.push(ringGeom1);
     const ringMat1 = new THREE.MeshBasicMaterial({
       color: 0x00f0ff,
       transparent: true,
-      opacity: isMobile ? 0.35 : 0.6,
+      opacity: 0.3,
       blending: THREE.AdditiveBlending
     });
     materialsToDispose.push(ringMat1);
     const ringMesh1 = new THREE.Mesh(ringGeom1, ringMat1);
-    ringMesh1.rotation.x = Math.PI / 2.2;
+    ringMesh1.rotation.x = Math.PI / 2.1;
     infraGroup.add(ringMesh1);
 
-    // Ring 2: Neon Pink/Magenta
-    const ringGeom2 = new THREE.TorusGeometry(1.65, 0.015, 8, 48);
+    const ringGeom2 = new THREE.TorusGeometry(2.1, 0.012, 8, 64);
     geometriesToDispose.push(ringGeom2);
     const ringMat2 = new THREE.MeshBasicMaterial({
       color: 0xff007f,
       transparent: true,
-      opacity: isMobile ? 0.35 : 0.55,
+      opacity: 0.25,
       blending: THREE.AdditiveBlending
     });
     materialsToDispose.push(ringMat2);
     const ringMesh2 = new THREE.Mesh(ringGeom2, ringMat2);
-    ringMesh2.rotation.y = Math.PI / 4;
+    ringMesh2.rotation.x = -Math.PI / 2.3;
     infraGroup.add(ringMesh2);
 
-    // Ring 3: Neon Teal/Green
-    const ringGeom3 = new THREE.TorusGeometry(2.0, 0.015, 8, 48);
-    geometriesToDispose.push(ringGeom3);
-    const ringMat3 = new THREE.MeshBasicMaterial({
-      color: 0x00ffd2,
-      transparent: true,
-      opacity: isMobile ? 0.3 : 0.5,
-      blending: THREE.AdditiveBlending
-    });
-    materialsToDispose.push(ringMat3);
-    const ringMesh3 = new THREE.Mesh(ringGeom3, ringMat3);
-    ringMesh3.rotation.x = -Math.PI / 3.8;
-    infraGroup.add(ringMesh3);
+    // 4. Data Packets (Flying light points along the server node paths)
+    const packetCount = isMobile ? 15 : 30;
+    const packetPositions = new Float32Array(packetCount * 3);
+    const packetData = [];
 
-    // Outer Orbiting Data Ring
-    const ringGroup = new THREE.Group();
-    infraGroup.add(ringGroup);
+    for (let i = 0; i < packetCount; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const radius = 1.4 + Math.random() * 0.8;
+      const speed = 0.005 + Math.random() * 0.012;
+      const yOffset = (Math.random() - 0.5) * 0.5;
 
-    const particleCount = isMobile ? 16 : 36; // Reduced count to prevent mobile GPU lag
-    const ringPositions = new Float32Array(particleCount * 3);
-    const linePositions = new Float32Array(particleCount * 2 * 3); // Radial spokes
-    const radius = 2.4;
+      packetPositions[i * 3] = Math.cos(angle) * radius;
+      packetPositions[i * 3 + 1] = yOffset;
+      packetPositions[i * 3 + 2] = Math.sin(angle) * radius;
 
-    for (let i = 0; i < particleCount; i++) {
-      const angle = (i / particleCount) * Math.PI * 2;
-      const px = Math.cos(angle) * radius;
-      const pz = Math.sin(angle) * radius;
-
-      ringPositions[i * 3] = px;
-      ringPositions[i * 3 + 1] = 0;
-      ringPositions[i * 3 + 2] = pz;
-
-      // Outer ring particle endpoint
-      linePositions[i * 6] = px;
-      linePositions[i * 6 + 1] = 0;
-      linePositions[i * 6 + 2] = pz;
-
-      // Center core endpoint
-      linePositions[i * 6 + 3] = 0;
-      linePositions[i * 6 + 4] = 0;
-      linePositions[i * 6 + 5] = 0;
+      packetData.push({
+        radius,
+        angle,
+        speed,
+        yOffset
+      });
     }
 
-    const ringGeometry = new THREE.BufferGeometry();
-    ringGeometry.setAttribute('position', new THREE.BufferAttribute(ringPositions, 3));
-    geometriesToDispose.push(ringGeometry);
+    const packetGeom = new THREE.BufferGeometry();
+    packetGeom.setAttribute('position', new THREE.BufferAttribute(packetPositions, 3));
+    geometriesToDispose.push(packetGeom);
 
-    // Canvas texture to make points circular & glowing
-    const createCircleTexture = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = 16;
-      canvas.height = 16;
-      const ctx = canvas.getContext('2d');
-      const grad = ctx.createRadialGradient(8, 8, 0, 8, 8, 8);
-      grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
-      grad.addColorStop(0.3, 'rgba(0, 240, 255, 0.8)');
-      grad.addColorStop(1, 'rgba(0, 240, 255, 0)');
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, 16, 16);
-      return new THREE.CanvasTexture(canvas);
-    };
-
-    const pointTexture = createCircleTexture();
-    materialsToDispose.push(pointTexture);
-
-    const ringMaterial = new THREE.PointsMaterial({
-      size: isMobile ? 0.14 : 0.2;
-      map: pointTexture,
+    const packetMat = new THREE.PointsMaterial({
+      size: isMobile ? 0.09 : 0.14,
+      color: 0x00ffd2,
       transparent: true,
-      opacity: isMobile ? 0.6 : 0.8,
+      opacity: 0.8,
       blending: THREE.AdditiveBlending,
       depthWrite: false
     });
-    materialsToDispose.push(ringMaterial);
+    materialsToDispose.push(packetMat);
 
-    const ringPoints = new THREE.Points(ringGeometry, ringMaterial);
-    ringGroup.add(ringPoints);
+    const dataPackets = new THREE.Points(packetGeom, packetMat);
+    infraGroup.add(dataPackets);
 
-    // Spokes geometry
-    const lineGeometry = new THREE.BufferGeometry();
-    lineGeometry.setAttribute('position', new THREE.BufferAttribute(linePositions, 3));
-    geometriesToDispose.push(lineGeometry);
-
-    const lineMaterial = new THREE.LineBasicMaterial({
-      color: 0xff007f, // Neon Pink lines connecting core to particles
-      transparent: true,
-      opacity: isMobile ? 0.15 : 0.25,
-      blending: THREE.AdditiveBlending
-    });
-    materialsToDispose.push(lineMaterial);
-
-    const lineMesh = new THREE.LineSegments(lineGeometry, lineMaterial);
-    ringGroup.add(lineMesh);
-
-    const gridHelper = new THREE.GridHelper(48, isMobile ? 20 : 40, 0x00f0ff, 0x090d16);
+    // Grid helper under the core
+    const gridHelper = new THREE.GridHelper(48, isMobile ? 18 : 36, 0x00f0ff, 0x090d16);
     gridHelper.position.y = -3.8;
     gridHelper.position.z = -2;
     gridHelper.material.opacity = 0.12;
     gridHelper.material.transparent = true;
     scene.add(gridHelper);
 
+    // 5. Nebula Starfield (Multi-colored glowing background particles)
     const particlesGeometry = new THREE.BufferGeometry();
-    const particlesCount = 170;
+    const particlesCount = isMobile ? 65 : 160;
     const positions = new Float32Array(particlesCount * 3);
+    const colors = new Float32Array(particlesCount * 3);
     const particleDrift = [];
 
+    const starColors = [
+      new THREE.Color(0x00f0ff), // Electric Cyan
+      new THREE.Color(0xff007f), // Hot Pink
+      new THREE.Color(0x00ffd2), // Teal
+      new THREE.Color(0xbd00ff)  // Purple
+    ];
+
     for (let i = 0; i < particlesCount; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 9;
-      positions[i * 3 + 1] = (Math.random() - 0.5) * 4.5;
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 5;
-      particleDrift.push(0.001 + Math.random() * 0.0025);
+      positions[i * 3] = (Math.random() - 0.5) * 11;
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 5;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 6;
+      particleDrift.push(0.001 + Math.random() * 0.002);
+
+      const color = starColors[Math.floor(Math.random() * starColors.length)];
+      colors[i * 3] = color.r;
+      colors[i * 3 + 1] = color.g;
+      colors[i * 3 + 2] = color.b;
     }
 
     particlesGeometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    particlesGeometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
     geometriesToDispose.push(particlesGeometry);
 
     const particlesMaterial = new THREE.PointsMaterial({
-      size: 0.04,
-      color: 0x00ffd2,
+      size: 0.045,
+      vertexColors: true,
       transparent: true,
-      opacity: 0.42,
+      opacity: 0.45,
       blending: THREE.AdditiveBlending
     });
     materialsToDispose.push(particlesMaterial);
 
     const dataParticles = new THREE.Points(particlesGeometry, particlesMaterial);
     scene.add(dataParticles);
+
+    // 6. Interactive Cursor Light (adds dynamic specular shading on glass/metal)
+    const cursorLight = new THREE.PointLight(0x00f0ff, isMobile ? 1.2 : 2.8, 14);
+    cursorLight.position.set(0, 0, 3);
+    scene.add(cursorLight);
 
     camera.position.z = 7;
 
@@ -491,8 +540,9 @@ export default function Home() {
 
     const checkModelVisibility = () => {
       if (window.innerWidth < 968) {
-        targetGroupPos.set(0, -1.8, -2.8); // Shifted down on mobile to clear text layout space
-        infraGroup.scale.set(0.64, 0.64, 0.64);
+        // Shifted further down and scaled down on mobile to clear text layout space
+        targetGroupPos.set(0, -2.4, -3.2); 
+        infraGroup.scale.set(0.46, 0.46, 0.46);
       } else {
         targetGroupPos.set(4.25, 0.25, -1.35);
         infraGroup.scale.set(1.08, 1.08, 1.08);
@@ -528,9 +578,13 @@ export default function Home() {
       // Look slightly higher on mobile to place the translated model in the lower part of the screen
       camera.lookAt(
         window.innerWidth < 968 ? 0 : targetGroupPos.x - 2.4, 
-        window.innerWidth < 968 ? -0.4 : targetGroupPos.y, 
+        window.innerWidth < 968 ? -0.6 : targetGroupPos.y, 
         targetGroupPos.z
       );
+
+      // Update Cursor Light position to track mouse and interact with physical materials
+      cursorLight.position.x += (mouseX * 5 - cursorLight.position.x) * 0.08;
+      cursorLight.position.y += (-mouseY * 5 - cursorLight.position.y) * 0.08;
 
       // Scroll interpolation
       const currentScroll = scrollRef.current;
@@ -540,26 +594,52 @@ export default function Home() {
       const time = Date.now() * 0.001;
 
       // Dynamic HSL shift for the core color to make it vibrant and colourful!
-      const hue = (time * 0.035) % 1;
+      const hue = (time * 0.03) % 1;
       coreMaterial.color.setHSL(hue, 0.95, 0.55);
 
       // Rotate core
-      coreMesh.rotation.y -= 0.0025;
-      coreMesh.rotation.x -= 0.0008;
+      coreMesh.rotation.y -= 0.004;
+      coreMesh.rotation.x -= 0.0015;
 
-      // Rotate concentric neon rings (gyroscopic motion)
+      // Pulse the inner core
+      const pulse = 1.0 + Math.sin(time * 6) * 0.12;
+      innerCoreMesh.scale.set(pulse, pulse, pulse);
+
+      // Orbiting cubes movement
+      nodes.forEach((n) => {
+        n.angle += 0.004 * n.speed;
+        
+        // Orbital positions
+        n.container.position.x = Math.cos(n.angle) * n.radius;
+        n.container.position.z = Math.sin(n.angle) * n.radius;
+        
+        // Float y-axis
+        n.container.position.y = n.initialY + Math.sin(time * 2 + n.floatOffset) * 0.16;
+
+        // Individual rotations
+        n.container.rotation.x += 0.005;
+        n.container.rotation.y += 0.008;
+      });
+
+      // Rotate rings in opposite directions
       ringMesh1.rotation.z += 0.0015;
-      ringMesh2.rotation.x += 0.002;
-      ringMesh2.rotation.y += 0.0008;
-      ringMesh3.rotation.y -= 0.0015;
-      ringMesh3.rotation.z += 0.0008;
+      ringMesh2.rotation.z -= 0.0012;
 
-      ringGroup.rotation.y += 0.003;
+      // Update flying data packets
+      const positionsArr = packetGeom.attributes.position.array;
+      packetData.forEach((p, idx) => {
+        p.angle += p.speed;
+        positionsArr[idx * 3] = Math.cos(p.angle) * p.radius;
+        positionsArr[idx * 3 + 2] = Math.sin(p.angle) * p.radius;
+        // Pulse Y-height slightly
+        positionsArr[idx * 3 + 1] = p.yOffset + Math.sin(time + idx) * 0.1;
+      });
+      packetGeom.attributes.position.needsUpdate = true;
 
-      // Layout positioning
+      // Layout positioning on scroll
       infraGroup.position.y = targetGroupPos.y + Math.sin(time) * 0.1 - (scrollFactor * 0.18);
-      infraGroup.rotation.y = Math.sin(time * 0.35) * 0.16 + scrollFactor * 0.12;
-      infraGroup.rotation.x = Math.sin(time * 0.25) * 0.04;
+      infraGroup.rotation.y = Math.sin(time * 0.35) * 0.12 + scrollFactor * 0.1;
+      infraGroup.rotation.x = Math.sin(time * 0.25) * 0.03;
 
       // Infinite scrolling grid (illusion of movement)
       gridHelper.position.z += 0.012;
@@ -568,15 +648,16 @@ export default function Home() {
       }
       gridHelper.rotation.y = mouseX * 0.05;
 
-      const positionsArr = particlesGeometry.attributes.position.array;
+      // Stars floating
+      const starsArr = particlesGeometry.attributes.position.array;
       for (let i = 0; i < particlesCount; i++) {
-        positionsArr[i * 3 + 1] += particleDrift[i];
-        if (positionsArr[i * 3 + 1] > 2.4) {
-          positionsArr[i * 3 + 1] = -2.3;
+        starsArr[i * 3 + 1] += particleDrift[i];
+        if (starsArr[i * 3 + 1] > 2.5) {
+          starsArr[i * 3 + 1] = -2.5;
         }
       }
       particlesGeometry.attributes.position.needsUpdate = true;
-      dataParticles.rotation.y += 0.0002;
+      dataParticles.rotation.y += 0.00015;
 
       renderer.render(scene, camera);
     };
@@ -597,6 +678,7 @@ export default function Home() {
       scene.remove(dataParticles);
       scene.remove(gridHelper);
       scene.remove(infraGroup);
+      scene.remove(cursorLight);
 
       if (renderer.domElement.parentNode === canvasContainer) {
         canvasContainer.removeChild(renderer.domElement);
