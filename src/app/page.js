@@ -473,6 +473,73 @@ export default function Home() {
         frameBottom.position.y = -1.825;
         rackGroup.add(frameBottom);
 
+        // Side wall panels (adds rich geometric detail to the sides of the cabinet)
+        const sidePanelGeo = new THREE.BoxGeometry(0.02, 1.0, 1.1);
+        const sidePanelMat = new THREE.MeshStandardMaterial({
+          color: 0x08090b,
+          metalness: 0.95,
+          roughness: 0.35
+        });
+
+        // Add 3 recessed panels vertically on left and right sides
+        for (let p = 0; p < 3; p++) {
+          const py = -1.1 + p * 1.1;
+
+          // Left Side Panels
+          const panelL = new THREE.Mesh(sidePanelGeo, sidePanelMat);
+          panelL.position.set(-0.73, py, 0);
+          panelL.castShadow = true;
+          panelL.receiveShadow = true;
+          rackGroup.add(panelL);
+
+          // Right Side Panels
+          const panelR = panelL.clone();
+          panelR.position.x = 0.73;
+          rackGroup.add(panelR);
+
+          // Add horizontal panel reinforcement ridges/bars
+          const ridgeGeo = new THREE.BoxGeometry(0.015, 0.03, 1.15);
+          const ridgeMat = new THREE.MeshStandardMaterial({ color: 0x1f222b, metalness: 0.95, roughness: 0.15 });
+          
+          for (let rd = 0; rd < 3; rd++) {
+            const rz = -0.4 + rd * 0.4;
+            
+            const ridgeL = new THREE.Mesh(ridgeGeo, ridgeMat);
+            ridgeL.position.set(-0.74, py, rz);
+            rackGroup.add(ridgeL);
+
+            const ridgeR = ridgeL.clone();
+            ridgeR.position.x = 0.74;
+            rackGroup.add(ridgeR);
+          }
+        }
+
+        // Top exhaust ventilation unit
+        const topExhaust = new THREE.Mesh(
+          new THREE.BoxGeometry(1.3, 0.05, 1.3),
+          new THREE.MeshStandardMaterial({ color: 0x1b1d24, metalness: 0.9, roughness: 0.25 })
+        );
+        topExhaust.position.set(0, 1.86, 0);
+        rackGroup.add(topExhaust);
+
+        // Circular exhaust fan meshes on the top
+        const exhaustRingGeo = new THREE.TorusGeometry(0.18, 0.02, 8, 24);
+        exhaustRingGeo.rotateX(Math.PI / 2);
+        const exhaustMat = new THREE.MeshStandardMaterial({ color: colorCabinetEdge, metalness: 0.98, roughness: 0.1 });
+        
+        for (let fanIdx = 0; fanIdx < 2; fanIdx++) {
+          const fz = -0.3 + fanIdx * 0.6;
+          const ring = new THREE.Mesh(exhaustRingGeo, exhaustMat);
+          ring.position.set(0, 1.89, fz);
+          rackGroup.add(ring);
+
+          // Fan mesh inside the ring
+          const centerGeo = new THREE.CylinderGeometry(0.04, 0.04, 0.01, 8);
+          const center = new THREE.Mesh(centerGeo, exhaustMat);
+          center.position.set(0, 1.89, fz);
+          rackGroup.add(center);
+        }
+
         // 2. Stack of Server Blades
         const bladeCount = 11;
         const startY = -1.5;
@@ -952,12 +1019,16 @@ export default function Home() {
         fan.rotation.z += 0.15;
       });
       
-      // Automatic gentle float up and down
-      infraGroup.position.y = targetGroupPos.y + Math.sin(time * 0.8) * 0.06 - (scrollFactor * 0.18);
+      // Slow, majestic floating up and down (decreased speed, increased amplitude)
+      infraGroup.position.y = targetGroupPos.y + Math.sin(time * 0.35) * 0.08 - (scrollFactor * 0.15);
       
-      // Multi-axis mouse-responsive parallax tilting and slow breathing wobble (always facing user)
-      const targetRotationY = 0.45 + mouseX * 0.5 + Math.sin(time * 0.4) * 0.08 + (scrollFactor * 0.12);
-      const targetRotationX = 0.15 - mouseY * 0.3 + Math.cos(time * 0.4) * 0.04;
+      // Sweeping back-and-forth idle rotation to show 3D details without showing raw backs
+      const idleRotationY = Math.sin(time * 0.22) * 0.12; // Sweeps +/- 7 degrees slowly
+      const idleRotationX = Math.cos(time * 0.22) * 0.03; // Sweeps +/- 1.7 degrees slowly
+      
+      // Limit mouse influence to a tight parallax tilt to prevent exposing flat profiles
+      const targetRotationY = 0.45 + idleRotationY + mouseX * 0.14 + (scrollFactor * 0.08);
+      const targetRotationX = 0.1 + idleRotationX - mouseY * 0.08;
       
       // Smooth interpolation for rotational responsiveness
       infraGroup.rotation.y += (targetRotationY - infraGroup.rotation.y) * 0.08;
