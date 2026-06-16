@@ -1061,29 +1061,19 @@ export default function Home() {
       <nav id="navbar" className={navbarScrolled ? "scrolled" : ""}>
         <div className="nav-container">
           <a href="#home" className="logo" onClick={(e) => handleNavClick(e, "home")}>
-            <div className="logo-icon">
-              <svg className="logo-svg" viewBox="0 0 100 100" width="42" height="42">
-                <defs>
-                  <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="var(--primary)" />
-                    <stop offset="100%" stopColor="var(--secondary)" />
-                  </linearGradient>
-                  <filter id="logoGlow" x="-20%" y="-20%" width="140%" height="140%">
-                    <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-                    <feMerge>
-                      <feMergeNode in="coloredBlur"/>
-                      <feMergeNode in="SourceGraphic"/>
-                    </feMerge>
-                  </filter>
-                </defs>
-                {/* Pulsing Brackets */}
-                <path className="logo-bracket-left" d="M22,35 L10,50 L22,65" fill="none" stroke="var(--primary)" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
-                <path className="logo-bracket-right" d="M78,35 L90,50 L78,65" fill="none" stroke="var(--secondary)" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
-                {/* Rotating Hexagon */}
-                <polygon className="logo-hex" points="50,15 80,32 80,68 50,85 20,68 20,32" fill="rgba(9, 13, 22, 0.6)" stroke="url(#logoGrad)" strokeWidth="4" />
-                {/* Inner stylized D */}
-                <path d="M42,35 H54 C61,35 65,39 65,47 C65,55 61,59 54,59 H42 Z M49,41 V53 H53 C57,53 58,51 58,47 C58,43 57,41 53,41 Z" fill="url(#logoGrad)" filter="url(#logoGlow)" />
-              </svg>
+            <div className="logo-icon" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <img 
+                src="/logo.png" 
+                alt="Durgesh Logo" 
+                width="38" 
+                height="38" 
+                style={{ 
+                  borderRadius: '50%', 
+                  border: '1.5px solid var(--primary)', 
+                  boxShadow: '0 0 8px rgba(0, 240, 255, 0.4)'
+                }}
+                className="logo-img"
+              />
             </div>
             <span>Durgesh</span>
           </a>
